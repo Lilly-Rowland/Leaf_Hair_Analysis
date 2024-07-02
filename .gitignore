@@ -1,0 +1,6 @@
+leaf_venv/
+coco_annotation_files/
+sc_05042023_3dpi_1/
+testing_leaf_samples/
+Presentation/
+models/unet_model_epoch_1.pth
