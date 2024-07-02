@@ -16,7 +16,7 @@ def train_model():
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     # Load full dataset
-    full_dataset = CocoDataset(img_dir="/Volumes/Image Data ", ann_file="/Volumes/Image Data /combined_coco.json", transform=transform)
+    full_dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
     # Define the split ratios
     train_split = 0.8
@@ -47,7 +47,7 @@ def train_model():
     test_dataloader = DataLoader(full_dataset, batch_size=32, sampler=test_sampler, num_workers=4)
 
     # Training and validation loop
-    num_epochs = 25
+    num_epochs = 30
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
