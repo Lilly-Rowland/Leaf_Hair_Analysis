@@ -1,48 +1,3 @@
-# import os
-# import json
-# import torch
-# from torch.utils.data import Dataset
-# from torchvision import transforms
-# from PIL import Image
-# import numpy as np
-
-# class CocoDataset(Dataset):
-#     def __init__(self, img_dir, ann_file, transform=None):
-#         self.img_dir = img_dir
-#         self.transform = transform
-#         with open(ann_file) as f:
-#             self.annotations = json.load(f)
-#         self.imgs = list(sorted(self.annotations["images"], key=lambda x: x['id']))
-#         self.anns = {ann["image_id"]: ann for ann in self.annotations["annotations"]}
-
-#     def __len__(self):
-#         return len(self.imgs)
-
-#     def __getitem__(self, idx):
-#         img_info = self.imgs[idx]
-#         img_id = img_info['id']
-#         print(img_info)
-#         img_path = os.path.join(self.img_dir, img_info['path'])
-#         image = Image.open(img_path).convert("RGB")
-        
-#         ann = self.anns[img_id]
-#         mask = Image.new("L", (image.width, image.height))
-#         for seg in ann['segmentation']:
-#             Image.Draw.Draw(mask).polygon(seg, outline=1, fill=1)
-#         mask = np.array(mask, dtype=np.uint8)
-
-#         if self.transform:
-#             image = self.transform(image)
-#             mask = torch.tensor(mask, dtype=torch.long)
-
-#         return image, mask
-
-# # Define data transformations
-# transform = transforms.Compose([
-#     transforms.ToTensor(),
-#     transforms.Normalize(mean=[0.5380782065015497, 0.6146645541178255, 0.4624397479931463], std=[0.12672495205043693, 0.12178723849002748, 0.1999076104405415]),
-# ])
-
 import os
 import json
 import torch
@@ -99,7 +54,8 @@ def transform(image, mask):
     # Define any additional transformations you need here
     transform = T.Compose([
         T.Resize((256, 256)),
-        T.ToTensor()
+        T.ToTensor(),
+        T.Normalize(mean=[0.5380782065015497, 0.6146645541178255, 0.4624397479931463], std=[0.12672495205043693, 0.12178723849002748, 0.1999076104405415]),
     ])
     
     image = transform(image)
