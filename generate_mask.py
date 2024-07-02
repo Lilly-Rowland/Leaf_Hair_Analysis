@@ -20,10 +20,11 @@ def preprocess_image(image_path, transform):
 
 # Post-process the output mask
 def postprocess_mask(mask, threshold=0.5):
-    mask = mask.squeeze()  # Remove batch dimension
+    mask = mask.squeeze().cpu()  # Remove batch dimension and move to CPU
     mask = torch.argmax(mask, dim=0)  # Convert to class predictions
     mask = mask.numpy()
     return mask
+
 
 # Generate a mask for a new image
 def generate_mask(model, image_path, transform, device):
