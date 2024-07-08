@@ -2,21 +2,21 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 from unet_model import UNet
-from coco_dataset import CocoDataset, transform
+from coco_dataset_transformed import CocoDataset, apply_transforms
 from torch.utils.data import DataLoader, SubsetRandomSampler
 import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-def train_model(batch_size=32, lr = 0.001):
+def train_model():
     # Define the model, loss function, and optimizer
     n_classes = 2  # Adjust based on your number of classes
     model = UNet(n_classes)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     # Load full dataset
-    full_dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
+    full_dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=apply_transforms)
 
     # Define the split ratios
     train_split = 0.8
@@ -42,9 +42,9 @@ def train_model(batch_size=32, lr = 0.001):
     test_sampler = SubsetRandomSampler(test_indices)
 
     # Create data loaders
-    train_dataloader = DataLoader(full_dataset, batch_size=batch_size, sampler=train_sampler, num_workers=4)
-    val_dataloader = DataLoader(full_dataset, batch_size=batch_size, sampler=val_sampler, num_workers=4)
-    test_dataloader = DataLoader(full_dataset, batch_size=batch_size, sampler=test_sampler, num_workers=4)
+    train_dataloader = DataLoader(full_dataset, batch_size=32, sampler=train_sampler, num_workers=4)
+    val_dataloader = DataLoader(full_dataset, batch_size=32, sampler=val_sampler, num_workers=4)
+    test_dataloader = DataLoader(full_dataset, batch_size=32, sampler=test_sampler, num_workers=4)
 
     # Training and validation loop
     num_epochs = 30
@@ -122,4 +122,4 @@ def train_model(batch_size=32, lr = 0.001):
     plt.show()
 
 if __name__ == "__main__":
-    train_model(32, .001)
+    train_model()

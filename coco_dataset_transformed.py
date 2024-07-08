@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 import numpy as np
 import torchvision.transforms as T
 import torchvision.transforms.functional as F
+from torchvision.transforms import v2
 from pycocotools.coco import COCO
 
 class CocoDataset(Dataset):
@@ -43,33 +44,30 @@ class CocoDataset(Dataset):
                 mask = np.maximum(self.coco.annToMask(ann) * ann['category_id'], mask)
 
         mask = np.clip(mask, 0, 1)
-        
+
         # Apply transformations
         if self.transform is not None:
             image, mask = self.transform(image, mask)
 
         return image, torch.as_tensor(mask, dtype=torch.long)
 
-def transform(image, mask):
-    # Define transformations for the image
-    transform_image = T.Compose([
-        T.Resize((224, 224)),
-        T.ToTensor(),
-        T.Normalize(mean=[0.5380782065015497, 0.6146645541178255, 0.4624397479931463],
-                    std=[0.12672495205043693, 0.12178723849002748, 0.1999076104405415]),
+def apply_transforms(image, mask):
+    # Define transformations
+    transform = v2.Compose([
+        v2.RandomHorizontalFlip(),  # Apply horizontal flipping with 50% probability
+        v2.RandomVerticalFlip(),    # Apply vertical flipping with 50% probability
+        # Add other transforms as needed (e.g., resizing, normalization)
     ])
     
-    # Apply transformations to the image
-    image = transform_image(image)
+    # Apply the same transformation to both image and mask
+    image, mask = transform(image, mask)
     
-    # Resize and convert mask to tensor
-    transform_mask = T.Compose([
-        T.Resize((224, 224), interpolation=T.InterpolationMode.NEAREST),
-    ])
+    # Convert to tensor and normalize image
+    image = T.ToTensor()(image)
+    image = T.Normalize(mean=[0.5380782065015497, 0.6146645541178255, 0.4624397479931463], 
+                        std=[0.12672495205043693, 0.12178723849002748, 0.1999076104405415])(image)
     
-    mask = transform_mask(Image.fromarray(mask))
     mask = torch.as_tensor(np.array(mask), dtype=torch.long)
-
-
+    
     return image, mask
 
