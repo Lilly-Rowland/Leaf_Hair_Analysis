@@ -46,3 +46,8 @@ class UNet(nn.Module):
         self.up3 = torch.utils.checkpoint(self.up3)
         self.up4 = torch.utils.checkpoint(self.up4)
         self.outc = torch.utils.checkpoint(self.outc)
+
+    def load_model(model_path, n_channels, n_classes):
+        model = UNet(n_channels=n_channels, n_classes=n_classes)
+        model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+        return model

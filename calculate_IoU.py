@@ -51,10 +51,11 @@ def evaluate_model(model, dataloader, device, n_classes):
 def main():
     # Define the model
     n_classes = 2  # Adjust based on your number of classes
-    model = UNet(n_classes)
+    model = UNet(3, 1)
 
     # Load the saved model weights
-    model.load_state_dict(torch.load('models/unet_model_epoch_30.pth'))
+    
+    model.load_state_dict(torch.load('models/unet_model_epoch_29.pth'))
     model.eval()
 
     # Load the full dataset
