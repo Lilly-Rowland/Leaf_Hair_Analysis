@@ -18,3 +18,21 @@ class DiceLoss(nn.Module):
         dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
         
         return 1 - dice
+
+class WeightedDiceLoss(nn.Module):
+    def __init__(self, weight):
+        super(WeightedDiceLoss, self).__init__()
+        self.weight = weight
+
+    def forward(self, inputs, targets, smooth=1):
+        inputs = F.sigmoid(inputs)  # Assuming outputs are raw logits
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+        
+        intersection = (inputs * targets).sum()
+        dice_loss = 1 - (2. * intersection + smooth) / (inputs.sum() + targets.sum() + smooth)
+        
+        # Apply weights
+        weighted_dice_loss = (self.weight[1] * dice_loss * targets + self.weight[0] * dice_loss * (1 - targets)).mean()
+        
+        return weighted_dice_loss

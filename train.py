@@ -8,12 +8,12 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import torch.nn.functional as F
-from dice_loss import DiceLoss
+from dice_loss import DiceLoss, WeightedDiceLoss
 from enum import Enum
 import random
 
 # Set random seed for reproducibility
-random_seed = 42
+random_seed = 201
 random.seed(random_seed)
 np.random.seed(random_seed)
 torch.manual_seed(random_seed)
@@ -26,14 +26,34 @@ class Criterion(Enum):
     DICE = 1
     XE = 2
 
-def train_model(model, loss, train_loader, val_loader, test_dataloader, lr=0.001):
+def calculate_class_weights(dataset):
+    # Initialize counters
+    num_background_pixels = 0
+    num_foreground_pixels = 0
+
+    # Loop through the dataset to count pixels
+    for _, mask in dataset:
+        num_background_pixels += torch.sum(mask == 0).item()
+        num_foreground_pixels += torch.sum(mask == 1).item()
+
+    total_pixels = num_background_pixels + num_foreground_pixels
+    weight_background = total_pixels / (2 * num_background_pixels)
+    weight_foreground = total_pixels / (2 * num_foreground_pixels)
+    print(f"{weight_background} and {weight_foreground}")
+
+    return torch.tensor([weight_background, weight_foreground])
+
+
+def train_model(model, loss, train_loader, val_loader, test_dataloader, class_weights = None, lr=0.001):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
+    class_weights = class_weights.to(device)
+
     if loss.upper() == "DICE":
-        criterion = DiceLoss()
+        criterion = DiceLoss(weight=class_weights)
     elif loss.upper() == "XE":
-        criterion = nn.CrossEntropyLoss()
+        criterion = nn.CrossEntropyLoss(weight=class_weights)
     else:
         print("Invalid criterion")
 
@@ -148,13 +168,14 @@ def prepare_data(dataset):
 
     return train_dataloader, val_dataloader, test_dataloader
 
-def run_train(dataset, run_name, loss):
-    
-    loss = "XE"
+def run_train(dataset, run_name = "learning_curve.png", loss = "XE", balance = False):
 
     dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
     train_dataloader, val_dataloader, test_dataloader = prepare_data(dataset)
+
+    # Calculate class weights
+    class_weights = calculate_class_weights(dataset)
 
     n_classes = 1
 
@@ -163,17 +184,19 @@ def run_train(dataset, run_name, loss):
 
     model = UNet(3, n_classes)  # Example: Replace with your UNet model instantiation
 
-    trained_model, train_losses, val_losses = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader)
+    trained_model, train_losses, val_losses = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, class_weights=class_weights)
     
     plot_training(run_name, train_losses, val_losses)
 
 if __name__ == "__main__":
 
-    run_name = "xe_test.png"
+    run_name = "results/learning_curves/dice_balance_seed_201.png"
 
-    loss = "XE"
+    loss = "Dice"
+
+    balance = True
 
     dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
 
-    run_train(dataset, run_name, loss)
+    run_train(dataset, run_name, loss, balance=True)
