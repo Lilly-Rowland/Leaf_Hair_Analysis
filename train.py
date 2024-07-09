@@ -10,6 +10,17 @@ import matplotlib.pyplot as plt
 import torch.nn.functional as F
 from dice_loss import DiceLoss
 from enum import Enum
+import random
+
+# Set random seed for reproducibility
+random_seed = 42
+random.seed(random_seed)
+np.random.seed(random_seed)
+torch.manual_seed(random_seed)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(random_seed)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 class Criterion(Enum):
     DICE = 1

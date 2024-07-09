@@ -5,6 +5,16 @@ from unet import UNet
 from coco_dataset import CocoDataset, transform
 import random
 
+# Set random seed for reproducibility
+random_seed = 42
+random.seed(random_seed)
+np.random.seed(random_seed)
+torch.manual_seed(random_seed)
+torch.cuda.manual_seed_all(random_seed)
+# Ensure deterministic behavior for certain operations
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+
 def calculate_iou(pred, target, n_classes):
     ious = []
     pred = pred.view(-1)
