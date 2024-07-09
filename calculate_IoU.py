@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from torch.utils.data import DataLoader, Subset
-from unet_model import UNet
+from unet import UNet
 from coco_dataset import CocoDataset, transform
 import random
 
@@ -50,12 +50,15 @@ def evaluate_model(model, dataloader, device, n_classes):
 
 def main():
     # Define the model
-    n_classes = 2  # Adjust based on your number of classes
-    model = UNet(3, 1)
+    isXE = False
+    n_classes = 1  # Number of classes in your segmentation task
+    if isXE:
+        n_classes = 2
+    model = UNet(3, n_classes)
 
     # Load the saved model weights
     
-    model.load_state_dict(torch.load('models/unet_model_epoch_29.pth'))
+    model.load_state_dict(torch.load('models/dice_loss_model.pth'))
     model.eval()
 
     # Load the full dataset

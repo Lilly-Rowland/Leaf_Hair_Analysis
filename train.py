@@ -137,22 +137,32 @@ def prepare_data(dataset):
 
     return train_dataloader, val_dataloader, test_dataloader
 
-if __name__ == "__main__":
-
-    run_name = "xe_test.png"
-
-    loss = "Dice"
+def run_train(dataset, run_name, loss):
+    
+    loss = "XE"
 
     dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
     train_dataloader, val_dataloader, test_dataloader = prepare_data(dataset)
 
     n_classes = 1
+
     if loss == "XE":
         n_classes = 2
 
-    model = UNet(3,n_classes)  # Example: Replace with your UNet model instantiation
+    model = UNet(3, n_classes)  # Example: Replace with your UNet model instantiation
 
     trained_model, train_losses, val_losses = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader)
     
     plot_training(run_name, train_losses, val_losses)
+
+if __name__ == "__main__":
+
+    run_name = "xe_test.png"
+
+    loss = "XE"
+
+    dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
+
+
+    run_train(dataset, run_name, loss)
