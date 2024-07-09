@@ -8,7 +8,7 @@ from unet import UNet  # Ensure this is the correct import path for your UNet mo
 
 # Load the trained model
 def load_model(model_path, n_classes):
-    model = UNet(3, 1)
+    model = UNet(3, n_classes)
     model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     model.eval()
     return model
@@ -20,27 +20,32 @@ def preprocess_image(image_path, transform):
     return image
 
 # Post-process the output mask
-def postprocess_mask(mask, threshold=0.5):
+def postprocess_mask(mask, isXE, threshold=0.5):
     mask = mask.squeeze().cpu()  # Remove batch dimension and move to CPU
-    mask = torch.argmax(mask, dim=0)  # Convert to class predictions
+    
+    if isXE:
+        mask = torch.argmax(mask, dim=0)  # Convert to class predictions
+    else:
+        mask = (mask > threshold).type(torch.uint8)  # Convert to binary mask
+
     mask = mask.numpy()
     return mask
 
 # Generate a mask for a new image
-def generate_mask(model, image_path, transform, device):
+def generate_mask(model, image_path, transform, device, isXE):
     image = preprocess_image(image_path, transform).to(device)
     with torch.no_grad():
         output = model(image)
-    mask = postprocess_mask(output)
+    mask = postprocess_mask(output, isXE)
     return mask
 
 # Generate masks for all images in a folder
-def generate_masks_for_folder(model, folder_path, transform, device):
+def generate_masks_for_folder(model, folder_path, transform, device, isXE):
     image_files = os.listdir(folder_path)
     for image_file in image_files:
         if image_file.endswith(".png") or image_file.endswith(".jpg"):  # Assuming all images are PNG or JPG
             image_path = os.path.join(folder_path, image_file)
-            mask = generate_mask(model, image_path, transform, device)
+            mask = generate_mask(model, image_path, transform, device, isXE)
             visualize_mask(image_path, mask)
 
 # Visualize the mask
@@ -59,9 +64,12 @@ def visualize_mask(image_path, mask):
 
 # Main function to load model and generate masks for all images in a folder
 if __name__ == "__main__":
-    model_path = 'models/unet_model_epoch_25.pth'
+    model_path = 'models/dice_loss_model.pth'
     folder_path = 'tester_images'  # Folder containing multiple images
-    n_classes = 2  # Number of classes in your segmentation task
+    isXE = False
+    n_classes = 1  # Number of classes in your segmentation task
+    if isXE:
+        n_classes = 2
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Define the same transforms used during training
@@ -73,4 +81,4 @@ if __name__ == "__main__":
     ])
 
     model = load_model(model_path, n_classes).to(device)
-    generate_masks_for_folder(model, folder_path, transform, device)
+    generate_masks_for_folder(model, folder_path, transform, device, isXE)
