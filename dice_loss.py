@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import torch
 
 class DiceLoss(nn.Module):
     def __init__(self, weight=None, size_average=True):
@@ -20,7 +21,7 @@ class DiceLoss(nn.Module):
         return 1 - dice
 
 class WeightedDiceLoss(nn.Module):
-    def __init__(self, weight):
+    def __init__(self, weight=None):
         super(WeightedDiceLoss, self).__init__()
         self.weight = weight
 
@@ -33,6 +34,8 @@ class WeightedDiceLoss(nn.Module):
         dice_loss = 1 - (2. * intersection + smooth) / (inputs.sum() + targets.sum() + smooth)
         
         # Apply weights
+        if self.weight == None:
+            self.weight = torch.ones(2, dtype=torch.float32)
         weighted_dice_loss = (self.weight[1] * dice_loss * targets + self.weight[0] * dice_loss * (1 - targets)).mean()
         
         return weighted_dice_loss

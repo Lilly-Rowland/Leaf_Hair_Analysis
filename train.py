@@ -22,6 +22,8 @@ if torch.cuda.is_available():
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
+torch.cuda.empty_cache()
+
 class Criterion(Enum):
     DICE = 1
     XE = 2
@@ -45,7 +47,7 @@ def calculate_class_weights(dataset):
 
 
 def train_model(model, loss, train_loader, val_loader, test_dataloader, class_weights = None, lr=0.001):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
     if class_weights == None:
@@ -55,7 +57,7 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
     if loss.upper() == "DICE":
         #if class_weights is None:
             #class_weights = torch.ones(1, dtype=torch.float32)
-        criterion = DiceLoss(weight=class_weights)
+        criterion = WeightedDiceLoss(weight=class_weights)
     elif loss.upper() == "XE":
         #if class_weights is None:
             #class_weights = torch.ones(2, dtype=torch.float32)
@@ -198,11 +200,11 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", balance = F
 
 if __name__ == "__main__":
 
-    run_name = "results/learning_curves/xe_transformed_seed_201.png"
+    run_name = "results/learning_curves/weighted_dice_transformed_seed_201.png"
 
-    loss = "XE"
+    loss = "Dice"
 
-    balance = False
+    balance = True
 
     dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
