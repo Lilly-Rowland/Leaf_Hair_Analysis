@@ -1,9 +1,21 @@
+
+
 import torch
 import numpy as np
 from torch.utils.data import DataLoader, Subset
-from unet_model import UNet
-from coco_dataset_transformed import CocoDataset, apply_transforms
+from unet import UNet
+from coco_dataset import CocoDataset, transform
 import random
+
+# Set random seed for reproducibility
+random_seed = 42
+random.seed(random_seed)
+np.random.seed(random_seed)
+torch.manual_seed(random_seed)
+torch.cuda.manual_seed_all(random_seed)
+# Ensure deterministic behavior for certain operations
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 def calculate_iou(pred, target, n_classes):
     ious = []
@@ -22,7 +34,6 @@ def calculate_iou(pred, target, n_classes):
     
     # Filter out NaN values from the IOU calculation
     ious = [iou for iou in ious if not np.isnan(iou)]
-    
     if len(ious) == 0:
         return float('nan')
     else:
@@ -39,7 +50,14 @@ def evaluate_model(model, dataloader, device, n_classes):
             masks = masks.to(device)
             
             outputs = model(images)
-            preds = outputs.argmax(dim=1)
+
+            if n_classes == 1:
+                preds = (outputs > 0.5).float()
+            elif n_classes == 2:
+                preds = outputs.argmax(dim=1)
+            else:
+                print("Wrong number of classes")
+
             iou = calculate_iou(preds, masks, n_classes)
             if not np.isnan(iou):
                 running_iou += iou
@@ -50,15 +68,19 @@ def evaluate_model(model, dataloader, device, n_classes):
 
 def main():
     # Define the model
-    n_classes = 2  # Adjust based on your number of classes
-    model = UNet(n_classes)
+    isXE = False
+    n_classes = 1  # Number of classes in your segmentation task
+    if isXE:
+        n_classes = 2
+    model = UNet(3, n_classes)
 
     # Load the saved model weights
-    model.load_state_dict(torch.load('models/unet_model_epoch_30.pth'))
+    
+    model.load_state_dict(torch.load('models/dice_loss_model.pth'))
     model.eval()
 
     # Load the full dataset
-    full_dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=apply_transforms)
+    full_dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
     # Select a subset of the dataset for testing
     subset_size = 200  # Define the size of the subset

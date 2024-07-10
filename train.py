@@ -48,11 +48,17 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
+    if class_weights == None:
+        class_weights = torch.ones(2, dtype=torch.float32)
     class_weights = class_weights.to(device)
 
     if loss.upper() == "DICE":
+        #if class_weights is None:
+            #class_weights = torch.ones(1, dtype=torch.float32)
         criterion = DiceLoss(weight=class_weights)
     elif loss.upper() == "XE":
+        #if class_weights is None:
+            #class_weights = torch.ones(2, dtype=torch.float32)
         criterion = nn.CrossEntropyLoss(weight=class_weights)
     else:
         print("Invalid criterion")
@@ -174,8 +180,10 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", balance = F
 
     train_dataloader, val_dataloader, test_dataloader = prepare_data(dataset)
 
+    class_weights = None
+    if balance:
     # Calculate class weights
-    class_weights = calculate_class_weights(dataset)
+        class_weights = calculate_class_weights(dataset)
 
     n_classes = 1
 
@@ -190,13 +198,13 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", balance = F
 
 if __name__ == "__main__":
 
-    run_name = "results/learning_curves/dice_balance_seed_201.png"
+    run_name = "results/learning_curves/xe_transformed_seed_201.png"
 
-    loss = "Dice"
+    loss = "XE"
 
-    balance = True
+    balance = False
 
     dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
 
-    run_train(dataset, run_name, loss, balance=True)
+    run_train(dataset, run_name, loss, balance=balance)

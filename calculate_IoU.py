@@ -19,20 +19,19 @@ def calculate_iou(pred, target, n_classes):
     ious = []
     pred = pred.view(-1)
     target = target.view(-1)
-    for cls in range(n_classes):
-        pred_inds = (pred == cls)
-        target_inds = (target == cls)
-        intersection = (pred_inds[target_inds]).long().sum().item()
-        union = pred_inds.long().sum().item() + target_inds.long().sum().item() - intersection
-        
-        if union == 0:
-            ious.append(1.0)  # If there are no predictions or ground truth for this class, it's perfect (IoU=1)
-        else:
-            ious.append(intersection / union)
+    cls = 1 if n_classes == 2 else 0
+    pred_inds = (pred == cls)
+    target_inds = (target == cls)
+    intersection = (pred_inds[target_inds]).long().sum().item()
+    union = pred_inds.long().sum().item() + target_inds.long().sum().item() - intersection
+    
+    if union == 0:
+        ious.append(1.0)  # If there are no predictions or ground truth for this class, it's perfect (IoU=1)
+    else:
+        ious.append(intersection / union)
     
     # Filter out NaN values from the IOU calculation
     ious = [iou for iou in ious if not np.isnan(iou)]
-    
     if len(ious) == 0:
         return float('nan')
     else:
@@ -49,7 +48,14 @@ def evaluate_model(model, dataloader, device, n_classes):
             masks = masks.to(device)
             
             outputs = model(images)
-            preds = outputs.argmax(dim=1)
+
+            if n_classes == 1:
+                preds = (outputs > 0.5).float()
+            elif n_classes == 2:
+                preds = outputs.argmax(dim=1)
+            else:
+                print("Wrong number of classes")
+
             iou = calculate_iou(preds, masks, n_classes)
             if not np.isnan(iou):
                 running_iou += iou
@@ -59,8 +65,9 @@ def evaluate_model(model, dataloader, device, n_classes):
     return avg_iou
 
 def main():
-    # Define the model
-    isXE = False
+    name = 'models/xe_seed_42.pth'
+    if 'xe' in name:
+        isXE = True
     n_classes = 1  # Number of classes in your segmentation task
     if isXE:
         n_classes = 2
@@ -68,7 +75,7 @@ def main():
 
     # Load the saved model weights
     
-    model.load_state_dict(torch.load('models/dice_loss_model.pth'))
+    model.load_state_dict(torch.load(name))
     model.eval()
 
     # Load the full dataset
