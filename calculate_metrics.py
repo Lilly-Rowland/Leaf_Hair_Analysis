@@ -37,9 +37,17 @@ def calculate_iou(pred, target, n_classes):
     else:
         return np.mean(ious)
 
+def calculate_dice(pred, target, smooth=1):
+    pred = pred.view(-1)
+    target = target.view(-1)
+    intersection = (pred * target).sum()
+    dice = (2. * intersection + smooth) / (pred.sum() + target.sum() + smooth)
+    return dice.item()
+
 def evaluate_model(model, dataloader, device, n_classes):
     model.eval()
     running_iou = 0.0
+    running_dice = 0.0
     count = 0
     
     with torch.no_grad():
@@ -57,15 +65,19 @@ def evaluate_model(model, dataloader, device, n_classes):
                 print("Wrong number of classes")
 
             iou = calculate_iou(preds, masks, n_classes)
+            dice = calculate_dice(preds, masks)
+            
             if not np.isnan(iou):
                 running_iou += iou
+                running_dice += dice
                 count += 1
 
     avg_iou = running_iou / count if count > 0 else float('nan')
-    return avg_iou
+    avg_dice = running_dice / count if count > 0 else float('nan')
+    return avg_iou, avg_dice
 
 def main():
-    name = 'models/unet_model_epoch_27.pth'
+    name = 'models/unet_model_epoch_1.pth'
     isXE = False
     if 'xe' in name:
         isXE = True
@@ -75,7 +87,6 @@ def main():
     model = UNet(3, n_classes)
 
     # Load the saved model weights
-    
     model.load_state_dict(torch.load(name))
     model.eval()
 
@@ -93,9 +104,10 @@ def main():
     # Evaluate the model on the test set
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
-    avg_test_iou = evaluate_model(model, test_dataloader, device, n_classes)
+    avg_test_iou, avg_test_dice = evaluate_model(model, test_dataloader, device, n_classes)
 
     print(f"Final Test mIOU: {avg_test_iou:.4f}")
+    print(f"Final Test Dice Coefficient: {avg_test_dice:.4f}")
 
 if __name__ == "__main__":
     main()

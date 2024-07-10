@@ -1,7 +1,7 @@
 import numpy as np
 from torchvision import transforms
 from PIL import Image
-from data_prep import Leaf_Dataset  # Replace with your dataset loader
+from sample_manipulation.data_prep import Leaf_Dataset  # Replace with your dataset loader
 
 # Define paths to your dataset and annotations
 
