@@ -65,7 +65,8 @@ def evaluate_model(model, dataloader, device, n_classes):
     return avg_iou
 
 def main():
-    name = 'models/xe_seed_42.pth'
+    name = 'models/unet_model_epoch_27.pth'
+    isXE = False
     if 'xe' in name:
         isXE = True
     n_classes = 1  # Number of classes in your segmentation task

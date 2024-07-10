@@ -64,7 +64,7 @@ def visualize_mask(image_path, mask):
 
 # Main function to load model and generate masks for all images in a folder
 if __name__ == "__main__":
-    model_path = 'models/dice_loss_model.pth'
+    model_path = 'models/unet_model_epoch_27.pth'
     folder_path = 'tester_images'  # Folder containing multiple images
     isXE = False
     n_classes = 1  # Number of classes in your segmentation task

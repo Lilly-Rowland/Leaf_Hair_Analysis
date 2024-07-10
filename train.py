@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch.nn.functional as F
 from dice_loss import DiceLoss, WeightedDiceLoss
+from diceBCE_loss import DiceBCELoss
 from enum import Enum
 import random
 
@@ -27,6 +28,7 @@ torch.cuda.empty_cache()
 class Criterion(Enum):
     DICE = 1
     XE = 2
+    DXE = 3
 
 def calculate_class_weights(dataset):
     # Initialize counters
@@ -41,7 +43,7 @@ def calculate_class_weights(dataset):
     total_pixels = num_background_pixels + num_foreground_pixels
     weight_background = total_pixels / (2 * num_background_pixels)
     weight_foreground = total_pixels / (2 * num_foreground_pixels)
-    print(f"{weight_background} and {weight_foreground}")
+    #print(f"{weight_background} and {weight_foreground}")
 
     return torch.tensor([weight_background, weight_foreground])
 
@@ -62,6 +64,10 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
         #if class_weights is None:
             #class_weights = torch.ones(2, dtype=torch.float32)
         criterion = nn.CrossEntropyLoss(weight=class_weights)
+    elif loss.upper() == "DICEBCE":
+        #if class_weights is None:
+            #class_weights = torch.ones(2, dtype=torch.float32)
+        criterion = DiceBCELoss(weight=class_weights)
     else:
         print("Invalid criterion")
 
@@ -82,7 +88,6 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
 
             optimizer.zero_grad()
             outputs = model(images)
-            
             loss = criterion(outputs, masks)
             loss.backward()
             optimizer.step()
@@ -104,9 +109,9 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
                 val_outputs = model(val_images)
                 val_loss = criterion(val_outputs, val_masks)
                 val_running_loss += val_loss.item()
-
+                
         val_loss = val_running_loss / len(val_loader)
-        val_losses.append(val_loss)
+        val_losses.append(val_loss) #FUTURE DEBUG: val loss is strange for DICEBCE
         print(f"Epoch [{epoch + 1}/{num_epochs}], Validation Loss: {val_loss:.4f}")
 
         # Save model checkpoint
@@ -200,11 +205,11 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", balance = F
 
 if __name__ == "__main__":
 
-    run_name = "results/learning_curves/weighted_dice_transformed_seed_201.png"
+    run_name = "results/learning_curves/diceBCE_transformed_seed_201.png"
 
-    loss = "Dice"
+    loss = "DiceBCE"
 
-    balance = True
+    balance = False
 
     dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
