@@ -17,11 +17,17 @@ torch.backends.cudnn.benchmark = False
 
 def confusion_matrix(preds, labels, num_classes):
     """Calculate the confusion matrix for a segmentation task."""
-    preds = preds.view(-1).cpu().numpy()
-    labels = labels.view(-1).cpu().numpy()
+    print(f"Preds shape: {preds.shape}, Labels shape: {labels.shape}")
+    
+    preds = preds.view(-1).cpu().numpy().astype(int)
+    labels = labels.view(-1).cpu().numpy().astype(int)
 
     conf_matrix = np.zeros((num_classes, num_classes), dtype=np.int64)
     for t, p in zip(labels, preds):
+        print(t)
+        print(p)
+        print(labels)
+        print(conf_matrix)
         conf_matrix[t, p] += 1
     return conf_matrix
 
@@ -34,7 +40,7 @@ def calculate_metrics(conf_matrix):
 
     precision = TP / (TP + FP) if (TP + FP) > 0 else 0
     recall = TP / (TP + FN) if (TP + FN) > 0 else 0
-    f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    f1_score = 2 * (precision * recall) / (precision + recall) if (precision * recall) > 0 else 0
 
     return precision, recall, f1_score
 
@@ -57,11 +63,15 @@ def evaluate_model(model, dataloader, device, num_classes):
             else:
                 print("Wrong number of classes")
 
+            # Squeeze the extra dimension from preds
+            preds = preds.squeeze(1)  # Now preds should have shape [batch_size, 224, 224]
+
             total_conf_matrix += confusion_matrix(preds, masks, num_classes)
 
     precision, recall, f1_score = calculate_metrics(total_conf_matrix)
 
     return total_conf_matrix, precision, recall, f1_score
+
 
 def main():
     model_path = 'models/unet_model_epoch_27.pth'
