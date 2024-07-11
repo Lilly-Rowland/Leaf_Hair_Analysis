@@ -2,6 +2,7 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 from unet import UNet  # Import your UNet model class
+from nested_unet import NestedUNet
 from coco_dataset import CocoDataset, transform  # Import your dataset class and transformation function
 from torch.utils.data import DataLoader, SubsetRandomSampler
 import time
@@ -181,7 +182,7 @@ def prepare_data(dataset):
 
     return train_dataloader, val_dataloader, test_dataloader
 
-def run_train(dataset, run_name = "learning_curve.png", loss = "XE", balance = False):
+def run_train(dataset, run_name = "learning_curve.png", loss = "XE", arch = "unet", balance = False):
 
     dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
@@ -197,7 +198,13 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", balance = F
     if loss == "XE":
         n_classes = 2
 
-    model = UNet(3, n_classes)  # Example: Replace with your UNet model instantiation
+    model = None
+    if arch.lower() == "unet":
+        model = UNet(3, n_classes)  # Example: Replace with your UNet model instantiation
+    elif arch.lower() == "nested_unet":
+        model = NestedUNet(3, n_classes)
+    else:
+        print("Invalid model")
 
     trained_model, train_losses, val_losses = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, class_weights=class_weights)
     
@@ -205,13 +212,15 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", balance = F
 
 if __name__ == "__main__":
 
-    run_name = "results/learning_curves/diceBCE_transformed_seed_201.png"
+    run_name = "results/learning_curves/xe_nested_unet_transformed_seed_201.png"
 
-    loss = "DiceBCE"
+    loss = "XE"
+
+    arch = "nested_unet" #unet or nested unet
 
     balance = False
 
     dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
 
-    run_train(dataset, run_name, loss, balance=balance)
+    run_train(dataset, run_name, loss, arch=arch, balance=balance)
