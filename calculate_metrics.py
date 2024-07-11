@@ -16,26 +16,52 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 def calculate_iou(pred, target, n_classes):
+    # ious = []
+    # pred = pred.view(-1)
+    # target = target.view(-1)
+    # cls = 1 if n_classes == 2 else 0
+
+    # pred_inds = (pred == cls)
+    # target_inds = (target == cls)
+    
+    # intersection = (pred_inds[target_inds]).long().sum().item()
+    # union = pred_inds.long().sum().item() + target_inds.long().sum().item() - intersection
+    
+    # if union == 0:
+    #     ious.append(1.0)  # If there are no predictions or ground truth for this class, it's perfect (IoU=1)
+    # else:
+    #     ious.append(intersection / union)
+    
+    # # Filter out NaN values from the IOU calculation
+    # ious = [iou for iou in ious if not np.isnan(iou)]
+    # if len(ious) == 0:
+    #     return float('nan')
+    # else:
+    #     return np.mean(ious)
+    
+
+    smooth = 1e-6  # Smooth to avoid division by zero
     ious = []
-    pred = pred.view(-1)
-    target = target.view(-1)
-    cls = 1 if n_classes == 2 else 0
-    pred_inds = (pred == cls)
-    target_inds = (target == cls)
-    intersection = (pred_inds[target_inds]).long().sum().item()
-    union = pred_inds.long().sum().item() + target_inds.long().sum().item() - intersection
-    
-    if union == 0:
-        ious.append(1.0)  # If there are no predictions or ground truth for this class, it's perfect (IoU=1)
-    else:
-        ious.append(intersection / union)
-    
-    # Filter out NaN values from the IOU calculation
-    ious = [iou for iou in ious if not np.isnan(iou)]
-    if len(ious) == 0:
-        return float('nan')
-    else:
-        return np.mean(ious)
+    tp_ious = []
+
+    for cls in range(n_classes):
+        pred_cls = (pred == cls).float().view(-1)
+        target_cls = (target == cls).float().view(-1)
+
+        intersection = (pred_cls * target_cls).sum().item()
+        union = pred_cls.sum().item() + target_cls.sum().item() - intersection
+
+        tp_intersection = (pred_cls & target_cls).float().sum().item()
+        tp_union = (pred_cls | target_cls).float().sum().item()
+
+        if union == 0:
+            ious.append(1.0)  # If no ground truth or predictions for this class, IoU is perfect
+        else:
+            ious.append((intersection + smooth) / (union + smooth))
+
+        if union != 0:
+            tp_ious.append((tp_intersection + smooth) / (tp_union + smooth))
+    return ious, tp_ious
 
 def calculate_dice(pred, target, smooth=1):
     pred = pred.view(-1)

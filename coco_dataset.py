@@ -71,8 +71,12 @@ def transform(image, mask):
         T.RandomVerticalFlip()
     ])
 
+    randomSeed = 201
     # Apply the transformations to the image and mask
-    seed = random.randint(0, 2147483647)
+    if randomSeed == 0:
+        seed = random.randint(0, 2147483647)
+    else:
+        seed = randomSeed
     random.seed(seed)
     torch.manual_seed(seed)
     image = transform_img(image)

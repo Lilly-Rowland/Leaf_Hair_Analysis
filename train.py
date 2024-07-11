@@ -288,8 +288,8 @@ def calculate_class_weights(dataset):
     return torch.tensor([weight_background, weight_foreground])
 
 
-def train_model(model, loss, train_loader, val_loader, test_dataloader, class_weights = None, lr=0.001):
-    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+def train_model(model, loss, train_loader, val_loader, test_dataloader, class_weights = None, lr=0.001, gpu_num = 2, num_epochs = 30):
+    device = torch.device(f"cuda:{gpu_num}" if torch.cuda.is_available() else "cpu")
     
     model.to(device)
     if loss.upper() == "DICE":
@@ -310,8 +310,6 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    
-    num_epochs = 30
     train_losses = []
     val_losses = []
 
@@ -371,7 +369,7 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
 
     print("Training finished.")
     
-    return model, train_losses, val_losses
+    return model, train_losses, val_losses, avg_test_loss
 
 def plot_training(name, train_losses, val_losses):
     plt.figure(figsize=(10, 5))
@@ -417,7 +415,7 @@ def prepare_data(dataset, batch_size=32):
 
     return train_dataloader, val_dataloader, test_dataloader
 
-def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=32, seed=201):
+def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=32, seed=201, num_epochs = 30):
 
     set_random_seed(seed=seed)
 
@@ -447,13 +445,17 @@ def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=3
     else:
         print("Invalid model")
 
-    trained_model, train_losses, val_losses = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, class_weights=class_weights)
+    trained_model, train_losses, val_losses, avg_test_loss = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, class_weights=class_weights, num_epochs = num_epochs)
 
     name = f"{arch}_{loss}_{'balanced' if balance else 'unbalanced'}_bs_{batch_size}_seed_{seed}"
-
-    torch.save(trained_model.state_dict(), f"models/{name}.pth")
+    saved_name = f"models/{name}.pth"
+    torch.save(trained_model.state_dict(), saved_name)
 
     plot_training(name, train_losses, val_losses)
+
+    print(f"{name} training and plotting completed")
+
+    return saved_name, avg_test_loss
 
 if __name__ == "__main__":
 
