@@ -33,7 +33,7 @@ class SegNet(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
 
-            nn.ConvTranspose2d(64, num_classes, kernel_size=2, stride=2, padding=1),
+            nn.ConvTranspose2d(64, num_classes, kernel_size=2, stride=2, padding=0),
         )
 
     def forward(self, x):

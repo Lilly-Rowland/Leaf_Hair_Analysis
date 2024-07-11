@@ -4,6 +4,7 @@ import torch.nn as nn
 from unet import UNet  # Import your UNet model class
 from nested_unet import NestedUNet
 from deeplabv3 import DeepLabV3
+from segnet import SegNet
 from coco_dataset import CocoDataset, transform  # Import your dataset class and transformation function
 from torch.utils.data import DataLoader, SubsetRandomSampler
 import time
@@ -54,21 +55,22 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
     device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    if class_weights == None:
-        class_weights = torch.ones(2, dtype=torch.float32)
-    class_weights = class_weights.to(device)
+    # if class_weights == None:
+    #     class_weights = torch.ones(2, dtype=torch.float32)
+    # class_weights = class_weights.to(device)
 
     if loss.upper() == "DICE":
-        #if class_weights is None:
-            #class_weights = torch.ones(1, dtype=torch.float32)
+        if class_weights is None:
+            class_weights = torch.ones(1, dtype=torch.float32)
         criterion = WeightedDiceLoss(weight=class_weights)
     elif loss.upper() == "XE":
-        #if class_weights is None:
-            #class_weights = torch.ones(2, dtype=torch.float32)
+        if class_weights is None:
+            class_weights = torch.ones(2, dtype=torch.float32)
+        class_weights = class_weights.to(device)
         criterion = nn.CrossEntropyLoss(weight=class_weights)
     elif loss.upper() == "DICEBCE":
-        #if class_weights is None:
-            #class_weights = torch.ones(2, dtype=torch.float32)
+        if class_weights is None:
+            class_weights = torch.ones(2, dtype=torch.float32)
         criterion = DiceBCELoss(weight=class_weights)
     else:
         print("Invalid criterion")
@@ -87,7 +89,6 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
         for images, masks in train_loader:
             images = images.to(device)
             masks = masks.to(device)
-
             optimizer.zero_grad()
             outputs = model(images)
             loss = criterion(outputs, masks)
@@ -196,7 +197,7 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", arch = "une
 
     n_classes = 1
 
-    if loss == "XE":
+    if loss.upper() == "XE":
         n_classes = 2
 
     model = None
@@ -206,6 +207,8 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", arch = "une
         model = NestedUNet(3, n_classes)
     elif arch.lower() == "deeplabv3":
         model = DeepLabV3(num_classes=n_classes)
+    elif arch.lower() == "segnet":
+        model = SegNet(3, n_classes)
     else:
         print("Invalid model")
 
@@ -215,13 +218,13 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", arch = "une
 
 if __name__ == "__main__":
 
-    run_name = "results/learning_curves/deeplabv3_xe_transformed_seed_201.png"
+    run_name = "results/learning_curves/segnet_xe_transformed_seed_201.png"
 
     loss = "XE"
 
-    arch = "deeplabv3" #unet or nested unet or deeplabv3
+    arch = "segnet" #unet or nested unet or deeplabv3 or segnet
 
-    balance = False
+    balance = True
 
     dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
 
