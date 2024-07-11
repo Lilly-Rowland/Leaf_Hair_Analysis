@@ -3,6 +3,7 @@ import torch.optim as optim
 import torch.nn as nn
 from unet import UNet  # Import your UNet model class
 from nested_unet import NestedUNet
+from deeplabv3 import DeepLabV3
 from coco_dataset import CocoDataset, transform  # Import your dataset class and transformation function
 from torch.utils.data import DataLoader, SubsetRandomSampler
 import time
@@ -203,6 +204,8 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", arch = "une
         model = UNet(3, n_classes)  # Example: Replace with your UNet model instantiation
     elif arch.lower() == "nested_unet":
         model = NestedUNet(3, n_classes)
+    elif arch.lower() == "deeplabv3":
+        model = DeepLabV3(num_classes=n_classes)
     else:
         print("Invalid model")
 
@@ -212,11 +215,11 @@ def run_train(dataset, run_name = "learning_curve.png", loss = "XE", arch = "une
 
 if __name__ == "__main__":
 
-    run_name = "results/learning_curves/xe_nested_unet_transformed_seed_201.png"
+    run_name = "results/learning_curves/deeplabv3_xe_transformed_seed_201.png"
 
     loss = "XE"
 
-    arch = "nested_unet" #unet or nested unet
+    arch = "deeplabv3" #unet or nested unet or deeplabv3
 
     balance = False
 
