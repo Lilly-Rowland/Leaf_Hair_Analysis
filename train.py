@@ -456,7 +456,7 @@ def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=3
 
     print(f"{name} training and plotting completed")
 
-    return saved_name, avg_test_loss
+    return saved_name, avg_test_loss, name
 
 if __name__ == "__main__":
 

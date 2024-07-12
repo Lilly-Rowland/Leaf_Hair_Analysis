@@ -3,8 +3,10 @@ import torch
 import multiprocessing as mp
 from coco_dataset import CocoDataset, transform
 from train import run_train  # Assuming your training function is in train.py
-from tp_calculate_metrics import run_metrics
+from old_calculate_metrics import run_metrics
 import pandas as pd
+from confusion_matrix_evaluation import plot_confusion_matrix
+import openpyxl
 
 
 NUM_EPOCHS = 1
@@ -27,16 +29,20 @@ BATCH_SIZE = [16]  # Batch sizes to experiment with
 #BATCH_SIZE = [16, 32, 64]  # Batch sizes to experiment with
 
 
+
 def run_experiment(dataset, experiment, gpu_index):
     # Unpack experiment parameters
     arch, loss, balance, batch = experiment
 
     # Run the experiment
     print(f"Running experiment for: Architecture={arch}, Loss={loss}, Balance={balance}, Batch Size={batch}")
-    trained_model, avg_test_loss = run_train(dataset, loss=loss, arch=arch, balance=balance, seed=SEED, batch_size = batch, num_epochs=NUM_EPOCHS, gpu_index = gpu_index)
+    trained_model, avg_test_loss, name = run_train(dataset, loss=loss, arch=arch, balance=balance, seed=SEED, batch_size = batch, num_epochs=NUM_EPOCHS, gpu_index = gpu_index)
 
     # Run metrics
-    avg_iou, avg_iou_weighted, avg_test_dice = run_metrics(trained_model, dataset, arch, batch, loss=loss, gpu_index = gpu_index)
+    avg_iou, avg_iou_weighted, avg_test_dice, precision, recall, f1, total_conf_matrix = run_metrics(trained_model, dataset, arch, batch, loss=loss, gpu_index = gpu_index)
+    
+    #create confusion matrix
+    plot_confusion_matrix(total_conf_matrix, classes = ['Background', 'Leaf Hair'], name = f"results/confusion_matrices/{name}.png")
 
     # Record results
     result_entry = {
@@ -45,23 +51,30 @@ def run_experiment(dataset, experiment, gpu_index):
         'Balance': 'Balanced' if balance else 'Unbalanced',
         'Batch Size': batch,
         'Average Test Loss': avg_test_loss,
-        'Average IOU': avg_iou,
-        'Average Weighted IOU': avg_iou_weighted,
-        'Average Dice Coefficient': avg_test_dice
+        'Average IOU': float(avg_iou),
+        'Average Weighted IOU': float(avg_iou_weighted),
+        'Average Dice Coefficient': avg_test_dice,
+        'Precision': precision,
+        'Recall': recall,
+        'F1': f1
     }
-
     return result_entry
 
 def run_ablation(dataset):
-    results = []
+    results = mp.Manager().list()
 
     #definig experiments to run
+    # experiments = []
+    # for arch_name in ARCHITECTURES.keys():
+    #     for loss_name in LOSS_FUNCTIONS.keys():
+    #         for balance_option in BALANCE_OPTIONS:
+    #             for batch_size in BATCH_SIZE:
+    #                 experiments.append((arch_name, loss_name, balance_option, batch_size))
     experiments = []
-    for arch_name in ARCHITECTURES.keys():
-        for loss_name in LOSS_FUNCTIONS.keys():
-            for balance_option in BALANCE_OPTIONS:
-                for batch_size in BATCH_SIZE:
-                    experiments.append((arch_name, loss_name, balance_option, batch_size))
+    arch_name = "segnet"
+    for loss_name in LOSS_FUNCTIONS.keys():
+        for balance_option in BALANCE_OPTIONS:
+                experiments.append((arch_name, loss_name, balance_option, 16))
     
     # Determine available GPUs
     num_gpus = torch.cuda.device_count()
@@ -88,8 +101,8 @@ def run_ablation(dataset):
     # Wait for all processes to finish
     for process in processes:
         process.join()
+    df = pd.DataFrame(list(results))
 
-    df = pd.DataFrame(results)
     excel_file = 'results/ablation_results.xlsx'
     df.to_excel(excel_file, index=False)
     print(f"Excel file '{excel_file}' created successfully.")

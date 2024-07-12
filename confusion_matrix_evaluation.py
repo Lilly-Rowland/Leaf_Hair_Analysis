@@ -26,15 +26,15 @@ def compute_confusion_matrix(preds, labels):
 
     return cm
 
-def plot_confusion_matrix(cm, classes):
+def plot_confusion_matrix(cm, classes, name = "conf_mat.png"):
     """Plot confusion matrix."""
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
     disp.plot(cmap=plt.cm.Blues)
     plt.xlabel('Predicted Labels')
     plt.ylabel('True Labels')
     plt.title('Confusion Matrix')
-    plt.savefig("conf_mat.png")
-    plt.show()
+    plt.savefig(name)
+    #plt.show()
 
 def evaluate_model(model, dataloader, device):
     """Evaluate model and compute confusion matrix."""
