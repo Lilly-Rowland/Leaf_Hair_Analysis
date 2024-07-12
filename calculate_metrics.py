@@ -158,9 +158,9 @@ def run_metrics(trained_model, dataset, arch, batch, loss, subset_size = 200, gp
     model.to(device)
     avg_iou, avg_iou_weighted, avg_test_dice, total_conf_matrix = evaluate_model(model, test_dataloader, device, n_classes, dataset)
 
-    print(f"Final Test IOU Weighted: {avg_iou:.4f}")
-    print(f"Final Test IOU Normal: {avg_iou_weighted:.4f}")
-    print(f"Final Test Dice Coefficient: {avg_test_dice:.4f}")
+    # print(f"Final Test IOU Weighted: {avg_iou:.4f}")
+    # print(f"Final Test IOU Normal: {avg_iou_weighted:.4f}")
+    # print(f"Final Test Dice Coefficient: {avg_test_dice:.4f}")
 
     precision, recall, f1 = calculate_prf(total_conf_matrix)
     return avg_iou, avg_iou_weighted, avg_test_dice, precision, recall, f1, total_conf_matrix

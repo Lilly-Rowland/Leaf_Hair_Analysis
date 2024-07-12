@@ -1,0 +1,55 @@
+loading annotations into memory...
+Done (t=0.12s)
+creating index...
+index created!
+Script running in the background. Check 'ablation.log' for logs.
+2024-07-12 13:59:15,976 - INFO - Available GPUs: 8
+2024-07-12 13:59:16,017 - INFO - Running experiment: Architecture=unet, Loss=xe, Balance=False, Batch Size=16
+2024-07-12 13:59:16,040 - INFO - Running experiment: Architecture=unet, Loss=xe, Balance=True, Batch Size=16
+2024-07-12 13:59:16,066 - INFO - Running experiment: Architecture=unet, Loss=dice, Balance=False, Batch Size=16
+2024-07-12 13:59:16,092 - INFO - Running experiment: Architecture=unet, Loss=dice, Balance=True, Batch Size=16
+2024-07-12 13:59:16,117 - INFO - Running experiment: Architecture=unet, Loss=dicebce, Balance=False, Batch Size=16
+2024-07-12 13:59:16,159 - INFO - Running experiment: Architecture=unet, Loss=dicebce, Balance=True, Batch Size=16
+2024-07-12 13:59:16,179 - INFO - Running experiment: Architecture=nested_unet, Loss=xe, Balance=False, Batch Size=16
+2024-07-12 13:59:16,200 - INFO - Running experiment: Architecture=nested_unet, Loss=xe, Balance=True, Batch Size=16
+2024-07-12 13:59:41,530 - INFO - Finished Experiment: Architecture=unet, Loss=dice, Balance=False, Batch Size=16
+2024-07-12 13:59:41,536 - INFO - Running experiment: Architecture=nested_unet, Loss=dice, Balance=False, Batch Size=16
+2024-07-12 13:59:54,495 - INFO - Finished Experiment: Architecture=unet, Loss=dice, Balance=True, Batch Size=16
+2024-07-12 13:59:54,505 - INFO - Running experiment: Architecture=nested_unet, Loss=dice, Balance=True, Batch Size=16
+2024-07-12 14:00:06,157 - INFO - Finished Experiment: Architecture=nested_unet, Loss=dice, Balance=False, Batch Size=16
+2024-07-12 14:00:06,159 - INFO - Running experiment: Architecture=nested_unet, Loss=dicebce, Balance=False, Batch Size=16
+2024-07-12 14:00:29,634 - INFO - Finished Experiment: Architecture=nested_unet, Loss=dice, Balance=True, Batch Size=16
+2024-07-12 14:00:29,636 - INFO - Running experiment: Architecture=nested_unet, Loss=dicebce, Balance=True, Batch Size=16
+2024-07-12 14:02:12,710 - INFO - Finished Experiment: Architecture=unet, Loss=xe, Balance=False, Batch Size=16
+2024-07-12 14:02:12,713 - INFO - Running experiment: Architecture=deeplabv3, Loss=xe, Balance=False, Batch Size=16
+2024-07-12 14:02:16,906 - INFO - Finished Experiment: Architecture=unet, Loss=dicebce, Balance=False, Batch Size=16
+2024-07-12 14:02:16,911 - INFO - Running experiment: Architecture=deeplabv3, Loss=xe, Balance=True, Batch Size=16
+2024-07-12 14:02:21,728 - INFO - Finished Experiment: Architecture=nested_unet, Loss=xe, Balance=False, Batch Size=16
+2024-07-12 14:02:21,732 - INFO - Running experiment: Architecture=deeplabv3, Loss=dice, Balance=False, Batch Size=16
+2024-07-12 14:02:22,902 - INFO - Finished Experiment: Architecture=unet, Loss=xe, Balance=True, Batch Size=16
+2024-07-12 14:02:22,906 - INFO - Running experiment: Architecture=deeplabv3, Loss=dice, Balance=True, Batch Size=16
+2024-07-12 14:02:25,381 - INFO - Finished Experiment: Architecture=unet, Loss=dicebce, Balance=True, Batch Size=16
+2024-07-12 14:02:25,386 - INFO - Running experiment: Architecture=deeplabv3, Loss=dicebce, Balance=False, Batch Size=16
+2024-07-12 14:02:38,429 - INFO - Finished Experiment: Architecture=nested_unet, Loss=xe, Balance=True, Batch Size=16
+2024-07-12 14:02:38,436 - INFO - Running experiment: Architecture=deeplabv3, Loss=dicebce, Balance=True, Batch Size=16
+2024-07-12 14:02:51,274 - INFO - Finished Experiment: Architecture=deeplabv3, Loss=dice, Balance=False, Batch Size=16
+2024-07-12 14:02:51,276 - INFO - Running experiment: Architecture=segnet, Loss=xe, Balance=False, Batch Size=16
+2024-07-12 14:03:01,837 - INFO - Finished Experiment: Architecture=nested_unet, Loss=dicebce, Balance=False, Batch Size=16
+2024-07-12 14:03:01,838 - INFO - Running experiment: Architecture=segnet, Loss=xe, Balance=True, Batch Size=16
+2024-07-12 14:03:03,550 - INFO - Finished Experiment: Architecture=deeplabv3, Loss=dice, Balance=True, Batch Size=16
+2024-07-12 14:03:03,553 - INFO - Running experiment: Architecture=segnet, Loss=dice, Balance=False, Batch Size=16
+2024-07-12 14:03:18,735 - INFO - Finished Experiment: Architecture=segnet, Loss=dice, Balance=False, Batch Size=16
+2024-07-12 14:03:18,737 - INFO - Running experiment: Architecture=segnet, Loss=dice, Balance=True, Batch Size=16
+2024-07-12 14:03:43,101 - INFO - Finished Experiment: Architecture=segnet, Loss=dice, Balance=True, Batch Size=16
+2024-07-12 14:03:43,103 - INFO - Running experiment: Architecture=segnet, Loss=dicebce, Balance=False, Batch Size=16
+2024-07-12 14:03:43,902 - INFO - Finished Experiment: Architecture=nested_unet, Loss=dicebce, Balance=True, Batch Size=16
+2024-07-12 14:03:43,906 - INFO - Running experiment: Architecture=segnet, Loss=dicebce, Balance=True, Batch Size=16
+2024-07-12 14:05:19,849 - INFO - Finished Experiment: Architecture=deeplabv3, Loss=xe, Balance=False, Batch Size=16
+2024-07-12 14:05:23,173 - INFO - Finished Experiment: Architecture=deeplabv3, Loss=xe, Balance=True, Batch Size=16
+2024-07-12 14:05:28,295 - INFO - Finished Experiment: Architecture=deeplabv3, Loss=dicebce, Balance=False, Batch Size=16
+2024-07-12 14:05:43,663 - INFO - Finished Experiment: Architecture=deeplabv3, Loss=dicebce, Balance=True, Batch Size=16
+2024-07-12 14:05:48,718 - INFO - Finished Experiment: Architecture=segnet, Loss=xe, Balance=False, Batch Size=16
+2024-07-12 14:05:53,770 - INFO - Finished Experiment: Architecture=segnet, Loss=xe, Balance=True, Batch Size=16
+2024-07-12 14:06:38,442 - INFO - Finished Experiment: Architecture=segnet, Loss=dicebce, Balance=False, Batch Size=16
+2024-07-12 14:06:52,623 - INFO - Finished Experiment: Architecture=segnet, Loss=dicebce, Balance=True, Batch Size=16
+2024-07-12 14:06:53,492 - INFO - Excel file 'results/ablation_results.xlsx' created successfully.
