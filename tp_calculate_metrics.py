@@ -473,9 +473,9 @@ def evaluate_model(model, dataloader, device, n_classes, dataset):
 
 def run_metrics(trained_model, dataset, arch, batch, loss, subset_size = 200, gpu_index = 2):
 
-    n_classes = 1
-    if 'xe' == loss:
-        n_classes = 2
+    n_classes = 2
+    if 'dice' == loss:
+        n_classes = 1
 
     model = None
     if arch.lower() == "unet":

@@ -4,6 +4,8 @@ import multiprocessing as mp
 from coco_dataset import CocoDataset, transform
 from train import run_train  # Assuming your training function is in train.py
 from tp_calculate_metrics import run_metrics
+import pandas as pd
+
 
 NUM_EPOCHS = 1
 SEED = 201
@@ -46,7 +48,6 @@ def run_experiment(dataset, experiment, gpu_index):
         'Average IOU': avg_iou,
         'Average Weighted IOU': avg_iou_weighted,
         'Average Dice Coefficient': avg_test_dice
-        ##metrics hereeee'Validation Loss': val_losses[-1]  # Final validation loss after training
     }
 
     return result_entry
@@ -88,6 +89,10 @@ def run_ablation(dataset):
     for process in processes:
         process.join()
 
+    df = pd.DataFrame(results)
+    excel_file = 'results/ablation_results.xlsx'
+    df.to_excel(excel_file, index=False)
+    print(f"Excel file '{excel_file}' created successfully.")
 
 if __name__ == "__main__":
 
