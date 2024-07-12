@@ -408,31 +408,24 @@ def calculate_iou(pred, target, n_classes, dataset):
     ious = []
     smooth = 1e-6  # Smooth to avoid division by zero
     ious = []
-    tp_ious = []
 
     for cls in range(n_classes):
         pred_cls = (pred == cls).float().view(-1)
         target_cls = (target == cls).float().view(-1)
-        tp_pred_cls = (pred == cls).bool().view(-1)  # Convert to BoolTensor
-        tp_target_cls = (target == cls).bool().view(-1)  # Convert to BoolTensor
 
 
         intersection = (pred_cls * target_cls).sum().item()
         union = pred_cls.sum().item() + target_cls.sum().item() - intersection
-
-        tp_intersection = (tp_pred_cls & tp_target_cls).float().sum().item()
-        tp_union = (tp_pred_cls | tp_target_cls).float().sum().item()
 
         if union == 0:
             ious.append(1.0)  # If no ground truth or predictions for this class, IoU is perfect
         else:
             ious.append((intersection + smooth) / (union + smooth))
 
-        if union != 0:
-            tp_ious.append((tp_intersection + smooth) / (tp_union + smooth))
-
-    weights = calculate_class_weights(dataset)
-    return np.mean(ious), weighted_mean(ious, weights.tolist())
+    if n_classes == 2:
+        weights = calculate_class_weights(dataset)
+        return np.mean(ious), weighted_mean(ious, weights.tolist())
+    return np.mean(ious), np.mean(ious)
 
 
 def calculate_dice(pred, target, smooth=1):
@@ -478,10 +471,10 @@ def evaluate_model(model, dataloader, device, n_classes, dataset):
     print(avg_iou_tp)
     return avg_iou, avg_iou_tp, avg_dice
 
-def run_metrics(trained_model, dataset, arch, batch):
+def run_metrics(trained_model, dataset, arch, batch, loss, subset_size = 200, gpu_index = 2):
 
     n_classes = 1
-    if 'xe' == arch:
+    if 'xe' == loss:
         n_classes = 2
 
     model = None
@@ -501,7 +494,6 @@ def run_metrics(trained_model, dataset, arch, batch):
     model.eval()
 
     # Select a subset of the dataset for testing
-    subset_size = 200  # Define the size of the subset
     subset_indices = random.sample(range(len(dataset)), subset_size)
     test_dataset = Subset(dataset, subset_indices)
 
@@ -509,13 +501,14 @@ def run_metrics(trained_model, dataset, arch, batch):
     test_dataloader = DataLoader(test_dataset, batch_size=batch, num_workers=4)
 
     # Evaluate the model on the test set
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(f"cuda:{gpu_index}" if torch.cuda.is_available() else "cpu")
     model.to(device)
-    avg_test_iou_tp, avg_test_iou_normal, avg_test_dice = evaluate_model(model, test_dataloader, device, n_classes, dataset)
+    avg_iou, avg_iou_weighted, avg_test_dice = evaluate_model(model, test_dataloader, device, n_classes, dataset)
 
-    print(f"Final Test IOU TP: {avg_test_iou_tp:.4f}")
-    print(f"Final Test IOU Normal: {avg_test_iou_normal:.4f}")
+    print(f"Final Test IOU Weighted: {avg_iou:.4f}")
+    print(f"Final Test IOU Normal: {avg_iou_weighted:.4f}")
     print(f"Final Test Dice Coefficient: {avg_test_dice:.4f}")
+    return avg_iou, avg_iou_weighted, avg_test_dice
 
 def main():
     name = 'models/segnet_xe_balanced_bs_32_seed_201.pth'

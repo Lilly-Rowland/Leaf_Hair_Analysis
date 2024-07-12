@@ -304,6 +304,7 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
     elif loss.upper() == "DICEBCE":
         if class_weights is None:
             class_weights = torch.ones(2, dtype=torch.float32)
+        class_weights = class_weights.to(device)
         criterion = DiceBCELoss(weight=class_weights)
     else:
         print("Invalid criterion")
@@ -331,7 +332,7 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
         epoch_time = time.time() - start_time
         train_loss = running_loss / len(train_loader)
         train_losses.append(train_loss)
-        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Time: {epoch_time:.2f} seconds")
+        #print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Time: {epoch_time:.2f} seconds")
 
         model.eval()
         val_running_loss = 0.0
@@ -346,7 +347,7 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
                 
         val_loss = val_running_loss / len(val_loader)
         val_losses.append(val_loss) #FUTURE DEBUG: val loss is strange for DICEBCE
-        print(f"Epoch [{epoch + 1}/{num_epochs}], Validation Loss: {val_loss:.4f}")
+        #print(f"Epoch [{epoch + 1}/{num_epochs}], Validation Loss: {val_loss:.4f}")
 
         # Save model checkpoint
         torch.save(model.state_dict(), f'models/unet_model_epoch_{epoch+1}.pth')
@@ -381,7 +382,7 @@ def plot_training(name, train_losses, val_losses):
     plt.legend()
     plt.grid(True)
     plt.savefig(f"results/learning_curves/{name}.png")
-    plt.show()
+    #plt.show()
 
 
 def prepare_data(dataset, batch_size=32):
@@ -415,7 +416,7 @@ def prepare_data(dataset, batch_size=32):
 
     return train_dataloader, val_dataloader, test_dataloader
 
-def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=32, seed=201, num_epochs = 30):
+def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=32, seed=201, num_epochs = 30, gpu_index = 1):
 
     set_random_seed(seed=seed)
 
@@ -445,7 +446,7 @@ def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=3
     else:
         print("Invalid model")
 
-    trained_model, train_losses, val_losses, avg_test_loss = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, class_weights=class_weights, num_epochs = num_epochs)
+    trained_model, train_losses, val_losses, avg_test_loss = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, class_weights=class_weights, num_epochs = num_epochs, gpu_num = gpu_index)
 
     name = f"{arch}_{loss}_{'balanced' if balance else 'unbalanced'}_bs_{batch_size}_seed_{seed}"
     saved_name = f"models/{name}.pth"

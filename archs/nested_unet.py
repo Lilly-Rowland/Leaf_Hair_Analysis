@@ -37,6 +37,7 @@ class NestedUNet(nn.Module):
         self.final = nn.Conv2d(64, out_channels, kernel_size=1)
 
     def forward(self, x):
+        #print(f"Input shape: {x.shape}")
         x0_0 = self.conv0_0(x)
         x1_0 = self.conv1_0(self.pool(x0_0))
         x2_0 = self.conv2_0(self.pool(x1_0))
@@ -58,4 +59,6 @@ class NestedUNet(nn.Module):
         x0_4 = self.conv0_4(torch.cat([x0_0, x0_1, x0_2, x0_3, self.upsample(x1_3)], 1))
 
         output = self.final(x0_4)
+
+        #print(f"Output shape of NestedUNet: {output.shape}")
         return output

@@ -34,7 +34,8 @@ class WeightedDiceLoss(nn.Module):
         dice_loss = 1 - (2. * intersection + smooth) / (inputs.sum() + targets.sum() + smooth)
         
         # Apply weights
-        if self.weight == None:
+        hi = self.weight.numel()
+        if self.weight == None or self.weight.numel() == 1.:
             self.weight = torch.ones(2, dtype=torch.float32)
         weighted_dice_loss = (self.weight[1] * dice_loss * targets + self.weight[0] * dice_loss * (1 - targets)).mean()
         
