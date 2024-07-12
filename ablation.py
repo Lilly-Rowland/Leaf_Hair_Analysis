@@ -10,7 +10,7 @@ import time
 import openpyxl
 import logging
 
-NUM_EPOCHS = 90
+NUM_EPOCHS = 100
 SEED = 555
 
 ARCHITECTURES = {

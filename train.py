@@ -53,7 +53,7 @@ def calculate_class_weights(dataset):
     return torch.tensor([weight_background, weight_foreground])
 
 
-def train_model(model, loss, train_loader, val_loader, test_dataloader, class_weights = None, lr=0.001, gpu_num = 2, num_epochs = 30):
+def train_model(model, loss, train_loader, val_loader, test_dataloader, class_weights=None, lr=0.001, gpu_num=2, num_epochs=30, patience=5, tolerance=1e-4):
     device = torch.device(f"cuda:{gpu_num}" if torch.cuda.is_available() else "cpu")
     
     model.to(device)
@@ -78,6 +78,8 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
 
     train_losses = []
     val_losses = []
+    best_val_loss = float('inf')
+    epochs_since_improvement = 0
 
     for epoch in range(num_epochs):
         model.train()
@@ -111,12 +113,20 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
                 val_running_loss += val_loss.item()
                 
         val_loss = val_running_loss / len(val_loader)
-        val_losses.append(val_loss) #FUTURE DEBUG: val loss is strange for DICEBCE
+        val_losses.append(val_loss)
         #print(f"Epoch [{epoch + 1}/{num_epochs}], Validation Loss: {val_loss:.4f}")
 
-        # Save model checkpoint
-        torch.save(model.state_dict(), f'models/unet_model_epoch_{epoch+1}.pth')
-
+        # Early stopping logic
+        if val_loss < best_val_loss - tolerance:
+            best_val_loss = val_loss
+            epochs_since_improvement = 0
+            # Save model checkpoint
+            torch.save(model.state_dict(), f'models/unet_model_epoch_{epoch+1}.pth')
+        else:
+            epochs_since_improvement += 1
+            if epochs_since_improvement >= patience:
+                print(f"Early stopping triggered. No improvement in validation loss for {patience} epochs.")
+                break
 
     # After training, evaluate on test set if needed
     model.eval()
