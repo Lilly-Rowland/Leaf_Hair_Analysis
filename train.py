@@ -53,7 +53,7 @@ def calculate_class_weights(dataset):
     return torch.tensor([weight_background, weight_foreground])
 
 
-def train_model(model, loss, train_loader, val_loader, test_dataloader, class_weights=None, lr=0.001, gpu_num=2, num_epochs=30, patience=5, tolerance=1e-4):
+def train_model(model, loss, train_loader, val_loader, test_dataloader, name, class_weights=None, lr=0.001, gpu_num=2, num_epochs=30, patience=10, tolerance=1e-4):
     device = torch.device(f"cuda:{gpu_num}" if torch.cuda.is_available() else "cpu")
     
     model.to(device)
@@ -117,11 +117,11 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, class_we
         #print(f"Epoch [{epoch + 1}/{num_epochs}], Validation Loss: {val_loss:.4f}")
 
         # Early stopping logic
-        if val_loss < best_val_loss - tolerance:
+        if val_loss <= best_val_loss:
             best_val_loss = val_loss
             epochs_since_improvement = 0
             # Save model checkpoint
-            torch.save(model.state_dict(), f'models/unet_model_epoch_{epoch+1}.pth')
+            torch.save(model.state_dict(), f'models/{name}_epoch_{epoch+1}.pth')
         else:
             epochs_since_improvement += 1
             if epochs_since_improvement >= patience:
@@ -221,10 +221,11 @@ def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=3
     else:
         print("Invalid model")
 
-    trained_model, train_losses, val_losses, avg_test_loss = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, class_weights=class_weights, num_epochs = num_epochs, gpu_num = gpu_index)
-
     name = f"{arch}_{loss}_{'balanced' if balance else 'unbalanced'}_bs_{batch_size}_seed_{seed}"
     saved_name = f"models/{name}.pth"
+
+    trained_model, train_losses, val_losses, avg_test_loss = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, name=name, class_weights=class_weights, num_epochs = num_epochs, gpu_num = gpu_index)
+
     torch.save(trained_model.state_dict(), saved_name)
 
     plot_training(name, train_losses, val_losses)
