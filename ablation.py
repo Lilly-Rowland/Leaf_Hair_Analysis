@@ -10,8 +10,8 @@ import time
 import openpyxl
 import logging
 
-NUM_EPOCHS = 1
-SEED = 201
+NUM_EPOCHS = 90
+SEED = 555
 
 ARCHITECTURES = {
     'unet': "UNet",

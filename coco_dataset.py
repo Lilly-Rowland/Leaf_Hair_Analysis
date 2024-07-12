@@ -71,7 +71,7 @@ def transform(image, mask):
         T.RandomVerticalFlip()
     ])
 
-    randomSeed = 201
+    randomSeed = 555
     # Apply the transformations to the image and mask
     if randomSeed == 0:
         seed = random.randint(0, 2147483647)
