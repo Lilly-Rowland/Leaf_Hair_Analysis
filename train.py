@@ -53,7 +53,7 @@ def calculate_class_weights(dataset):
     return torch.tensor([weight_background, weight_foreground])
 
 
-def train_model(model, loss, train_loader, val_loader, test_dataloader, name, class_weights=None, lr=0.001, gpu_num=2, num_epochs=30, patience=10, tolerance=1e-4):
+def train_model(model, loss, train_loader, val_loader, test_dataloader, name, class_weights=None, lr=0.001, gpu_num=2, num_epochs=30, patience=20, tolerance=1e-4):
     device = torch.device(f"cuda:{gpu_num}" if torch.cuda.is_available() else "cpu")
     
     model.to(device)
@@ -120,6 +120,10 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, name, cl
         if val_loss <= best_val_loss:
             best_val_loss = val_loss
             epochs_since_improvement = 0
+            # Save model checkpoint
+            torch.save(model.state_dict(), f'models/{name}_epoch_{epoch+1}.pth')
+        elif val_loss <= best_val_loss + tolerance:
+            best_val_loss = val_loss
             # Save model checkpoint
             torch.save(model.state_dict(), f'models/{name}_epoch_{epoch+1}.pth')
         else:
