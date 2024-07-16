@@ -13,6 +13,8 @@ def split_image_into_tiles(image_path, leaf_folder, tile_size=224):
         # Calculate the number of rows and columns
         num_rows = height // tile_size
         num_cols = width // tile_size
+
+        positions = []
         
         # Iterate over each tile
         for row in range(num_rows):
@@ -28,7 +30,13 @@ def split_image_into_tiles(image_path, leaf_folder, tile_size=224):
                 
                 # Save the tile with the specified name
                 tile_name = os.path.splitext(os.path.basename(image_path))[0] + f"_{row}_{col}.png"
-                tile.save(os.path.join(leaf_folder, tile_name))
+                tile_path = os.path.join(leaf_folder, tile_name)
+                tile.save(tile_path)
+                
+                positions.append((row, col, tile_path))
+
+        return positions, img.size
+
 
 def split_images_in_directory(input_folder, output_folder):
 

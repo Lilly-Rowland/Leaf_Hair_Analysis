@@ -88,7 +88,8 @@ def main(image_dir, tile_dir, model, loss, results):
     create_or_clear_directory(tile_dir)
     count = 0
     for leaf in os.listdir(image_dir):
-        if not (leaf.endswith(".png") or leaf.endswith(".jpg")):
+        count += 1
+        if not (leaf.endswith(".png") or leaf.endswith(".jpg")) or count%2==1:
             continue  # Skip hidden or system directories
         create_or_clear_directory(tile_dir)
         split_image_into_tiles(os.path.join(image_dir, leaf), tile_dir, tile_size=224)
@@ -105,9 +106,8 @@ def main(image_dir, tile_dir, model, loss, results):
         leaf_hair_percent = float(total_hair_pixels)/leaf_pixels
         new_row = {"Leaf Id": leaf[:-4], "Landing Area %": 1 - leaf_hair_percent}
         results_df = pd.concat([results_df, pd.DataFrame([new_row])], ignore_index=True)
-        count += 1
         print(count)
-        if count > 3:
+        if count > 5:
             break
     print(results_df)
     results_df.to_excel(results, index=False)
