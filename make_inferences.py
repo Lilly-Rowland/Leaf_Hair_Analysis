@@ -16,6 +16,8 @@ from unet import UNet  # Import your UNet model class
 from archs.nested_unet import NestedUNet
 from archs.deeplabv3 import DeepLabV3
 from archs.segnet import SegNet
+import numpy as np
+import pandas as pd
 
 # Dictionary mapping string keys to loss types
 LossTypes = {
@@ -39,6 +41,12 @@ def load_model(arch, model_path, n_classes):
     model.eval()
     return model
 
+def calculate_percent_landing_area(mask):
+    total_pixels = mask.size
+    hair_pixels = np.sum(mask == 1)
+    percentage = (hair_pixels / total_pixels) * 100
+    return percentage
+
 def create_or_clear_directory(directory_path):
     if os.path.exists(directory_path):
         shutil.rmtree(directory_path)  # Remove the directory and all its contents
@@ -52,10 +60,10 @@ def preprocess_image(image_path, transform):
     return image
 
 # Post-process the output mask
-def postprocess_mask(mask, isXE, threshold=0.5):
+def postprocess_mask(mask, loss, threshold=0.5):
     mask = mask.squeeze().cpu()  # Remove batch dimension and move to CPU
     
-    if isXE:
+    if loss == "xe":
         mask = torch.argmax(mask, dim=0)  # Convert to class predictions
     else:
         mask = (mask > threshold).type(torch.uint8)  # Convert to binary mask
@@ -64,41 +72,57 @@ def postprocess_mask(mask, isXE, threshold=0.5):
     return mask
 
 # Generate a mask for a new image
-def generate_mask(model, image_path, transform, device, isXE):
+def generate_mask(model, image_path, transform, device, loss):
     image = preprocess_image(image_path, transform).to(device)
     with torch.no_grad():
         output = model(image)
-    mask = postprocess_mask(output, isXE)
-    return mask
-
-# Get masks for folder
-def generate_masks_for_folder(model, folder_path, transform, device, isXE, annotation_file):
-    image_files = os.listdir(folder_path)
-    for image_file in image_files:
-        if image_file.endswith(".png") or image_file.endswith(".jpg"):  # Assuming all images are PNG or JPG
-            image_path = os.path.join(folder_path, image_file)
-            mask = generate_mask(model, image_path, transform, device, isXE)
+    mask = postprocess_mask(output, loss)
     return mask
 
 
-def main(image_dir, tile_dir, model):
+def main(image_dir, tile_dir, model, loss, results):
+    columns = ["Leaf Id", "Landing Area %"]
+    results_df = pd.DataFrame(columns=columns)
+    leaf_pixels = 3850201 #find better way to calculate this?
+
     create_or_clear_directory(tile_dir)
+    count = 0
     for leaf in os.listdir(image_dir):
         if not (leaf.endswith(".png") or leaf.endswith(".jpg")):
             continue  # Skip hidden or system directories
-        split_image_into_tiles(leaf, tile_dir, tile_size=224)
+        create_or_clear_directory(tile_dir)
+        split_image_into_tiles(os.path.join(image_dir, leaf), tile_dir, tile_size=224)
+        total_hair_pixels = 0
 
-        #run model here
+        #run model
+        for tile in os.listdir(tile_dir):
+            tile_path = os.path.join(tile_dir, tile)
+            mask = generate_mask(model, tile_path, transform, device, loss)
+            total_hair_pixels += np.sum(mask == 1)
 
+        #do more calculations
+        print(total_hair_pixels)
+        leaf_hair_percent = float(total_hair_pixels)/leaf_pixels
+        new_row = {"Leaf Id": leaf[:-4], "Landing Area %": 1 - leaf_hair_percent}
+        results_df = pd.concat([results_df, pd.DataFrame([new_row])], ignore_index=True)
+        count += 1
+        print(count)
+        if count > 3:
+            break
+    print(results_df)
+    results_df.to_excel(results, index=False)
+            
 
 if __name__ == "__main__":
     model_path = 'models/deeplabv3_dice_balanced_bs_32_seed_555_epoch_26.pth'
 
-    image_dir = "ooogabooga"
+    image_dir = "leaves_to_inference"
     tile_dir = "/tmp/temp_tiles"
 
     arch = "deeplabv3"
     loss = "dice"
+
+    results = "hair_model_results.xlsx"
 
     n_classes = LossTypes[loss]
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -113,4 +137,4 @@ if __name__ == "__main__":
 
     model = load_model(arch, model_path, n_classes).to(device)
 
-    main(image_dir, tile_dir, model)
+    main(image_dir, tile_dir, model, n_classes, results)
