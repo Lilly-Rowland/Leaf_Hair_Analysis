@@ -7,3 +7,4 @@ models/*
 Data/
 leaves_to_inference/
 whole_leaf_masks/
+cropped_leaves/

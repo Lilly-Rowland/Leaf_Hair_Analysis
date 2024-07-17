@@ -83,13 +83,12 @@ def generate_mask(model, image_path, transform, device, loss):
 def main(image_dir, tile_dir, model, loss, results):
     columns = ["Leaf Id", "Landing Area %"]
     results_df = pd.DataFrame(columns=columns)
-    leaf_pixels = 3850201 #find better way to calculate this?
+    leaf_pixels = 23775576.344 #find better way to calculate this?
 
     create_or_clear_directory(tile_dir)
-    count = 0
     for leaf in os.listdir(image_dir):
-        count += 1
-        if not (leaf.endswith(".png") or leaf.endswith(".jpg")) or count%2==1:
+
+        if not (leaf.endswith(".png") or leaf.endswith(".jpg")):
             continue  # Skip hidden or system directories
         create_or_clear_directory(tile_dir)
         split_image_into_tiles(os.path.join(image_dir, leaf), tile_dir, tile_size=224)
@@ -106,9 +105,7 @@ def main(image_dir, tile_dir, model, loss, results):
         leaf_hair_percent = float(total_hair_pixels)/leaf_pixels
         new_row = {"Leaf Id": leaf[:-4], "Landing Area %": 1 - leaf_hair_percent}
         results_df = pd.concat([results_df, pd.DataFrame([new_row])], ignore_index=True)
-        print(count)
-        if count > 5:
-            break
+
     print(results_df)
     results_df.to_excel(results, index=False)
             
@@ -138,3 +135,7 @@ if __name__ == "__main__":
     model = load_model(arch, model_path, n_classes).to(device)
 
     main(image_dir, tile_dir, model, n_classes, results)
+
+    # 23775575.9384
+    # 3850201
+    # 23775576.344
