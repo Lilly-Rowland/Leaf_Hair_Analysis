@@ -4,16 +4,78 @@ from matplotlib import pyplot as plt
 import os
 from PIL import Image, ImageCms
 import time
+from skimage.filters import threshold_otsu
+from skimage import morphology
 
 # Record the start time
 start_time = time.time()
 
+def keep_largest_component(binary_image):
+    # Find contours of all objects
+    contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    # If no contours found, return original image
+    if not contours:
+        return binary_image
+    
+    # Find the largest contour based on area
+    largest_contour = max(contours, key=cv2.contourArea)
+    
+    # Create a mask for the largest contour
+    mask = np.zeros_like(binary_image)
+    cv2.drawContours(mask, [largest_contour], -1, 255, thickness=cv2.FILLED)
+    
+    # Apply the mask to the binary image
+    largest_component_image = cv2.bitwise_and(binary_image, mask)
+    
+    return largest_component_image
+
 def interpolate_image(binary_image):
     # Morphological operations to fill small gaps and smooth edges
-    kernel = np.ones((31, 31), np.uint8)
-    dilated_image = cv2.dilate(binary_image, kernel, iterations=8)
+    kernel = np.ones((25, 25), np.uint8)
+    dilated_image = cv2.dilate(binary_image, kernel, iterations=8, borderType=cv2.BORDER_CONSTANT, borderValue=0)
     eroded_image = cv2.erode(dilated_image, kernel, iterations=8)
-    blurred_image = cv2.GaussianBlur(eroded_image, (15, 15), 2)
+    
+    # orImage = eroded_image.copy()
+    # h, w = eroded_image.shape[:2]
+    # mask = np.zeros((h+2, w+2), np.uint8)
+    # orImage = cv2.floodFill(eroded_image, mask, (4250, 2500), 255)
+    cleaned_image = keep_largest_component(eroded_image)
+
+    thresholded_image = cleaned_image > threshold_otsu(eroded_image)
+
+    # Accumulated true from left to right (horizontal)
+    trueLeft = np.logical_or.accumulate(thresholded_image, axis=1)
+
+    # Accumulated true from right to left (horizontal)
+    trueRight = np.logical_or.accumulate(thresholded_image[:, ::-1], axis=1)[:, ::-1]
+
+    # Accumulated true from top to bottom (vertical)
+    trueTop = np.logical_or.accumulate(thresholded_image, axis=0)
+
+    # Accumulated true from bottom to top (vertical)
+    trueBottom = np.logical_or.accumulate(thresholded_image[::-1, :], axis=0)[::-1]
+
+    # True if there's any true in both horizontal directions (left and right)
+    horizontal_or_image = trueLeft * trueRight
+
+    # True if there's any true in both vertical directions (top and bottom)
+    vertical_or_image = trueTop * trueBottom
+
+    # True if there's any true in both horizontal and vertical directions
+    orImage = horizontal_or_image & vertical_or_image
+    
+    blurred_image = orImage.astype(np.uint8) * 255
+
+    blurred_image = cv2.GaussianBlur(blurred_image, (15, 15), 2)
+
+    # plt.imshow(blurred_image)
+    # plt.show()
+
+    # cv2.imwrite("ooh.png",closed_image)
+    # blurred_image = cv2.GaussianBlur(closed_image, (25, 25), 2)
+
+        
     return blurred_image
 
 def preprocess_image(image):
@@ -73,26 +135,27 @@ def crop_leaf_disc(image_path, save_path, min_radius, max_radius, center_x_range
     #thresholded_b_channel_np = preprocess_image(thresholded_b_channel_np)
     thresholded_b_channel_np = interpolate_image(thresholded_b_channel_np)
     
+    resized_mask = cv2.resize(thresholded_b_channel_np.astype(np.uint8), (image.shape[1], image.shape[0]))
+    
+    resized_mask_3ch = cv2.merge([resized_mask, resized_mask, resized_mask])
 
-    # Resize (if needed)
-    scaling_factor = 1
-    new_width = int(thresholded_b_channel_np.shape[1] * scaling_factor)
-    new_height = int(thresholded_b_channel_np.shape[0] * scaling_factor)
-    resized_img = cv2.resize(thresholded_b_channel_np, (new_width, new_height))
-
-    # Blur the image to reduce noise
-    img_blurred = cv2.medianBlur(resized_img, 9)
-
-    plt.imshow(thresholded_b_channel_np, cmap='gray')
+    print(resized_mask.shape)
+    print(image.shape)
+    masked_image = cv2.bitwise_and(image, resized_mask_3ch)
+    plt.imshow(masked_image)
     plt.show()
-    cv2.imwrite("ooh.png",thresholded_b_channel_np)
+    cv2.imwrite(save_path, masked_image)
+    return masked_image
+    
+
+    return masked_image
     # Apply Hough Circle Transform to find the circles
     circles = cv2.HoughCircles(
         img_blurred, 
         cv2.HOUGH_GRADIENT, dp=2, minDist=new_height//2,
         param1=100, param2=30, minRadius=min_radius, maxRadius=max_radius
     )
-
+    
     if circles is not None:
         circles = np.round(circles[0, :]).astype("int")
 
@@ -149,7 +212,7 @@ center_y_range = (1000, 4000)
 # Crop the leaf disc from the images
 for leaf in os.listdir("leaves_to_inference"):
     crop_leaf_disc(f"leaves_to_inference/{leaf}", f"cropped_leaves_faster/cropped_{os.path.basename(leaf)}", min_radius, max_radius, center_x_range, center_y_range)
-
+    print(leaf)
 
 end_time = time.time()
 
