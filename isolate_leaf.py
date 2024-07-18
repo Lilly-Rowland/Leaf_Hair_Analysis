@@ -17,22 +17,6 @@ def interpolate_image(binary_image):
     return blurred_image
 
 def preprocess_image(image):
-    # # Apply Gaussian Blur
-    # blurred_image = cv2.GaussianBlur(image, (9, 9), 2)
-
-    # # Increase contrast
-    # alpha = 2.0 # Contrast control (1.0-3.0)
-    # beta = 0   # Brightness control (0-100)
-    # contrasted_image = cv2.convertScaleAbs(blurred_image, alpha=alpha, beta=beta)
-
-    # # Adaptive Thresholding
-    # binary_image = cv2.adaptiveThreshold(
-    #     contrasted_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-    #     cv2.THRESH_BINARY_INV, 11, 2
-    # )
-    
-    # return binary_image
-        # Apply Gaussian Blur
     blurred_image = cv2.GaussianBlur(image, (15, 15), 2)
 
     # Increase contrast
