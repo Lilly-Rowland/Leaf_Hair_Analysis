@@ -21,6 +21,7 @@ import pandas as pd
 from crop_leaf import get_background_mask
 import numpy as np
 from PIL import Image
+import matplotlib.pyplot as plt
 
 # Dictionary mapping string keys to loss types
 LossTypes = {
@@ -83,6 +84,42 @@ def generate_mask(model, image_path, transform, device, loss):
     return mask
 
 
+def stitch_masks(tile_masks):
+    # Create an empty mask array to combine all masks
+    image_size = [6144, 9216]
+    stitched_mask = np.zeros(image_size, dtype=np.uint8)
+
+    max_x = 0
+    max_y = 0
+    # Paste each mask into the stitched mask at the correct position
+    for item in tile_masks:
+        mask = item["mask"]
+        x_start = item["col"] * 256  # Calculate start x-coordinate in stitched mask
+        y_start = item["row"] * 256  # Calculate start y-coordinate in stitched mask
+
+        # Determine the end coordinates within the stitched mask
+        x_end = x_start + 256
+        y_end = y_start + 256
+
+        max_x = x_end
+        max_y = y_end
+        # Skip mask if it is cropped (dimensions do not match expected size)
+        if mask.shape[0] != 256 or mask.shape[1] != 256:
+            continue
+        
+        # Overlay the mask onto the stitched mask
+        stitched_mask[y_start:y_end, x_start:x_end] = mask
+    
+    # Clip the values to ensure they are in the valid range for uint8
+    stitched_mask = np.clip(stitched_mask, 0, 255).astype(np.uint8)
+
+    # Create a PIL Image from the stitched mask array
+    stitched_image = Image.fromarray(stitched_mask)
+
+    # Debugging: Visualize stitched_mask before returning
+    
+    return stitched_image
+
 def main(image_dir, tile_dir, model, loss, results):
     
 
@@ -96,27 +133,48 @@ def main(image_dir, tile_dir, model, loss, results):
     for leaf in os.listdir(image_dir):
         image_path = os.path.join(image_dir, leaf)
         background_mask = get_background_mask(image_path)
+
         total_leaf_pixels = np.count_nonzero(background_mask)
 
-        if not (leaf.endswith(".png") or leaf.endswith(".jpg")):
+        if not (leaf.endswith(".png") or leaf.endswith(".jpg")) or leaf.count('_') == 0:
             continue  # Skip hidden or system directories
+
         create_or_clear_directory(tile_dir)
+        
         split_image_into_tiles(image_path, tile_dir, tile_size=224)
         total_hair_pixels = 0
+
+        tile_masks = []
+        tile_paths = []
 
         #run model
         for tile in os.listdir(tile_dir):
             tile_path = os.path.join(tile_dir, tile)
             mask = generate_mask(model, tile_path, transform, device, loss)
-            total_hair_pixels += np.count_nonzero(mask)
-        print(total_hair_pixels)
-        print(total_leaf_pixels)
+            mask_name = os.path.basename(tile_path)
 
-        #do more calculations
-        print(total_hair_pixels)
-        leaf_hair_percent = float(total_hair_pixels)/total_leaf_pixels
+            row = int(mask_name.split('_')[2])  # Extract row from mask name
+            col = int(mask_name.split('_')[3][:-4])  # Extract col from mask name
+
+            tile_masks.append({"mask": mask, "row": row, "col": col})
+
+            total_hair_pixels += np.count_nonzero(mask)
+
+            tile_paths.append(tile_path)
+
+
+        reconstructed_mask = stitch_masks(tile_masks).resize((8254, 5502),Image.NEAREST)
+   
+        reconstructed_mask = reconstructed_mask & background_mask
+        
+        Image.fromarray((reconstructed_mask * 255).astype(np.uint8)).save(f'whole_leaf_masks/reconstructed_mask_{leaf}')
+
+        leaf_hair_percent = float(np.count_nonzero(reconstructed_mask))/total_leaf_pixels
+
         new_row = {"Leaf Id": leaf[:-4], "Landing Area %": 1 - leaf_hair_percent}
+
         print(new_row)
+
         results_df = pd.concat([results_df, pd.DataFrame([new_row])], ignore_index=True)
 
     print(results_df)
