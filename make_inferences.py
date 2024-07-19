@@ -18,6 +18,9 @@ from archs.deeplabv3 import DeepLabV3
 from archs.segnet import SegNet
 import numpy as np
 import pandas as pd
+from crop_leaf import get_background_mask
+import numpy as np
+from PIL import Image
 
 # Dictionary mapping string keys to loss types
 LossTypes = {
@@ -81,29 +84,39 @@ def generate_mask(model, image_path, transform, device, loss):
 
 
 def main(image_dir, tile_dir, model, loss, results):
+    
+
+    # Calculate num pixels in total leaf
+     #23775576.344 #find better way to calculate this?
+
     columns = ["Leaf Id", "Landing Area %"]
     results_df = pd.DataFrame(columns=columns)
-    leaf_pixels = 23775576.344 #find better way to calculate this?
 
     create_or_clear_directory(tile_dir)
     for leaf in os.listdir(image_dir):
+        image_path = os.path.join(image_dir, leaf)
+        background_mask = get_background_mask(image_path)
+        total_leaf_pixels = np.count_nonzero(background_mask)
 
         if not (leaf.endswith(".png") or leaf.endswith(".jpg")):
             continue  # Skip hidden or system directories
         create_or_clear_directory(tile_dir)
-        split_image_into_tiles(os.path.join(image_dir, leaf), tile_dir, tile_size=224)
+        split_image_into_tiles(image_path, tile_dir, tile_size=224)
         total_hair_pixels = 0
 
         #run model
         for tile in os.listdir(tile_dir):
             tile_path = os.path.join(tile_dir, tile)
             mask = generate_mask(model, tile_path, transform, device, loss)
-            total_hair_pixels += np.sum(mask == 1)
+            total_hair_pixels += np.count_nonzero(mask)
+        print(total_hair_pixels)
+        print(total_leaf_pixels)
 
         #do more calculations
         print(total_hair_pixels)
-        leaf_hair_percent = float(total_hair_pixels)/leaf_pixels
+        leaf_hair_percent = float(total_hair_pixels)/total_leaf_pixels
         new_row = {"Leaf Id": leaf[:-4], "Landing Area %": 1 - leaf_hair_percent}
+        print(new_row)
         results_df = pd.concat([results_df, pd.DataFrame([new_row])], ignore_index=True)
 
     print(results_df)

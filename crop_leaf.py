@@ -6,9 +6,6 @@ from PIL import Image, ImageCms
 import time
 from skimage.filters import threshold_otsu
 
-# Record the start time
-start_time = time.time()
-
 def keep_largest_component(binary_image):
 
     # Find contours of all objects
@@ -73,12 +70,12 @@ def create_mask(binary_image):
     filled_image = fill_holes(cleaned_image)
 
     # Blur to smooth edges
-    blurred_image = cv2.GaussianBlur(filled_image, (15, 15), 2)
+    blurred_image = cv2.GaussianBlur(filled_image, (15, 15),5)
 
-    return blurred_image
+    return filled_image
 
 
-def crop_leaf_disc(image_path, save_path):
+def crop_leaf_disc(image_path, justMask = False):
     
     color_threshold = 140
 
@@ -102,24 +99,38 @@ def crop_leaf_disc(image_path, save_path):
     
     # Resize mask for bitwise and with image
     resized_mask = cv2.resize(thresholded_b_channel_np.astype(np.uint8), (image.shape[1], image.shape[0]))
+
+    if justMask:
+        return resized_mask
+
     resized_mask_3ch = cv2.merge([resized_mask, resized_mask, resized_mask])
 
+    # if justMask:
+    #     return resized_mask_3ch
+    
     masked_image = cv2.bitwise_and(image, resized_mask_3ch)
-
-    cv2.imwrite(save_path, masked_image)
 
     return masked_image
 
+def get_background_mask(image_path):
+    mask = crop_leaf_disc(image_path, True)
+    return mask
 
-# Crop the leaf disc from the images
-for leaf in os.listdir("leaves_to_inference"):
-    crop_leaf_disc(f"leaves_to_inference/{leaf}", f"cropped_leaves/cropped_{os.path.basename(leaf)}")
-    print(leaf)
+def main():
+    # Crop the leaf disc from the images
+    for leaf in os.listdir("leaves_to_inference"):
+        masked_image = crop_leaf_disc(f"leaves_to_inference/{leaf}")
+        cv2.imwrite(f"cropped_leaves/cropped_{os.path.basename(leaf)}", masked_image)
+        print(leaf)
+if __name__ == "__main__":
+    # Record the start time
+    start_time = time.time()
 
-end_time = time.time()
+    main()
 
-# Calculate the elapsed time
-elapsed_time = end_time - start_time
+    end_time = time.time()
+    # Calculate the elapsed time
+    elapsed_time = end_time - start_time
 
-# Print the elapsed time
-print(f"Elapsed time: {elapsed_time:.4f} seconds")
+    # Print the elapsed time
+    print(f"Elapsed time: {elapsed_time:.4f} seconds")
