@@ -4,21 +4,33 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from crop_leaf import get_background_mask
 
+def remove_outliers(hole_sizes):
+    # Calculate Q1 (25th percentile) and Q3 (75th percentile)
+    Q1 = np.percentile(hole_sizes, 25)
+    Q3 = np.percentile(hole_sizes, 75)
+    IQR = Q3 - Q1
+    
+    # Define bounds for outliers
+    lower_bound = Q1 - 100 * IQR
+    upper_bound = Q3 + 100 * IQR
+    
+    # Filter out the outliers
+    filtered_hole_sizes = hole_sizes[(hole_sizes >= lower_bound) & (hole_sizes <= upper_bound)]
+    
+    return filtered_hole_sizes
+
 def find_hole_sizes(hair_mask, background_mask):
     # Invert the hair mask with background
     inverted_mask = cv2.bitwise_not(hair_mask | cv2.bitwise_not(background_mask))
     
     # Find connected components
-    num_labels, labels, comp_stats, centroids = cv2.connectedComponentsWithStats(inverted_mask, connectivity=8)
-    print(num_labels)
-    print(labels)
-    print(comp_stats)
-    print(centroids)
-    # Exclude the background label (0)
-    hole_sizes = comp_stats[1:, cv2.CC_STAT_AREA]
-    print("bahhh")
-    print(hole_sizes)
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(inverted_mask, connectivity=8)
     
+    hole_sizes = stats[1:, cv2.CC_STAT_AREA]
+    
+    min_size = 8.1
+    hole_sizes = hole_sizes[hole_sizes >= min_size]
+    hole_sizes = remove_outliers(hole_sizes)
     # Calculate statistics
     mean_size = np.mean(hole_sizes)
     median_size = np.median(hole_sizes)
@@ -30,6 +42,7 @@ def find_hole_sizes(hair_mask, background_mask):
     print(f'Median hole size: {median_size}')
     print(f'Max hole size: {max_size}')
     print(f'Min hole size: {min_size}')
+    print(f"Number of holes:  {hole_sizes.size}")
     
 
     #oneeee
@@ -75,13 +88,14 @@ def find_hole_sizes(hair_mask, background_mask):
 
     
     # Calculate additional statistics if needed
-    mode_size = stats.mode(hole_sizes)[0]
+    #mode_size = stats.mode(hole_sizes)[0]
     std_dev_size = np.std(hole_sizes)
     
     # Print additional statistics
-    print(f'Mode hole size: {mode_size}')
+   #print(f'Mode hole size: {mode_size}')
     print(f'Standard deviation of hole sizes: {std_dev_size}')
     
+    np.savetxt("array.txt", hole_sizes)
     # Return hole sizes and statistics
     return {
         'hole_sizes': hole_sizes,
@@ -89,7 +103,7 @@ def find_hole_sizes(hair_mask, background_mask):
         'median_size': median_size,
         'max_size': max_size,
         'min_size': min_size,
-        'mode_size': mode_size,
+        #'mode_size': mode_size,
         'std_dev_size': std_dev_size
     }
 
