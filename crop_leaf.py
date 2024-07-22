@@ -107,7 +107,8 @@ def crop_leaf_disc(image_path, justMask = False):
 
     # if justMask:
     #     return resized_mask_3ch
-    
+    cv2.imwrite(f"background_mask_{os.path.basename(image_path)}", resized_mask_3ch)
+
     masked_image = cv2.bitwise_and(image, resized_mask_3ch)
 
     return masked_image
@@ -122,6 +123,7 @@ def main():
         masked_image = crop_leaf_disc(f"leaves_to_inference/{leaf}")
         cv2.imwrite(f"cropped_leaves/cropped_{os.path.basename(leaf)}", masked_image)
         print(leaf)
+
 if __name__ == "__main__":
     # Record the start time
     start_time = time.time()

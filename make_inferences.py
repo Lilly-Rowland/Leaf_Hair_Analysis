@@ -120,11 +120,12 @@ def stitch_masks(tile_masks):
     
     return stitched_image
 
-def main(image_dir, tile_dir, model, loss, results):
-    
+# def find_hole_sizes():
+#     #invert images
+#     #find sizes of different obect in image --> make array of the different sizes + do stats
+#     # mean, median, max size, min size, distribution, graph of distribution
 
-    # Calculate num pixels in total leaf
-     #23775576.344 #find better way to calculate this?
+def main(image_dir, tile_dir, model, loss, results):
 
     columns = ["Leaf Id", "Landing Area %"]
     results_df = pd.DataFrame(columns=columns)
@@ -206,7 +207,3 @@ if __name__ == "__main__":
     model = load_model(arch, model_path, n_classes).to(device)
 
     main(image_dir, tile_dir, model, n_classes, results)
-
-    # 23775575.9384
-    # 3850201
-    # 23775576.344
