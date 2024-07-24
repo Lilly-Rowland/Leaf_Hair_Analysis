@@ -22,6 +22,7 @@ from crop_leaf import get_background_mask
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import cv2
 
 # Dictionary mapping string keys to loss types
 LossTypes = {
@@ -89,8 +90,6 @@ def stitch_masks(tile_masks):
     image_size = [6144, 9216]
     stitched_mask = np.zeros(image_size, dtype=np.uint8)
 
-    max_x = 0
-    max_y = 0
     # Paste each mask into the stitched mask at the correct position
     for item in tile_masks:
         mask = item["mask"]
@@ -101,8 +100,6 @@ def stitch_masks(tile_masks):
         x_end = x_start + 256
         y_end = y_start + 256
 
-        max_x = x_end
-        max_y = y_end
         # Skip mask if it is cropped (dimensions do not match expected size)
         if mask.shape[0] != 256 or mask.shape[1] != 256:
             continue
@@ -129,12 +126,16 @@ def main(image_dir, tile_dir, model, loss, results):
 
     columns = ["Leaf Id", "Landing Area %"]
     results_df = pd.DataFrame(columns=columns)
+    # if not os.path.isfile(results):
+    #     results_df = pd.DataFrame(columns=columns)
+    # else:
+    #     results_df = pd.read_excel(results)
 
     create_or_clear_directory(tile_dir)
     for leaf in os.listdir(image_dir):
         image_path = os.path.join(image_dir, leaf)
         background_mask = get_background_mask(image_path)
-
+        print(np.max(background_mask))
         total_leaf_pixels = np.count_nonzero(background_mask)
 
         if not (leaf.endswith(".png") or leaf.endswith(".jpg")) or leaf.count('_') == 0:
@@ -148,7 +149,7 @@ def main(image_dir, tile_dir, model, loss, results):
         tile_masks = []
         tile_paths = []
 
-        #run model
+        # Run model and create reconstructed mask
         for tile in os.listdir(tile_dir):
             tile_path = os.path.join(tile_dir, tile)
             mask = generate_mask(model, tile_path, transform, device, loss)
@@ -165,21 +166,28 @@ def main(image_dir, tile_dir, model, loss, results):
 
 
         reconstructed_mask = stitch_masks(tile_masks).resize((8254, 5502),Image.NEAREST)
+        print(np.max(reconstructed_mask))
    
         reconstructed_mask = reconstructed_mask & background_mask
+
+        landing_area_mask = cv2.bitwise_not((reconstructed_mask * 255).astype(np.uint8) | cv2.bitwise_not(background_mask))
         
-        Image.fromarray((reconstructed_mask * 255).astype(np.uint8)).save(f'whole_leaf_masks/reconstructed_mask_{leaf}')
+        pofasfsafasfasd(landing_area_mask, total_hair_pixels, total_leaf_pixels)
+        Image.fromarray((landing_area_mask)).save(f'whole_leaf_masks/inverted_mask_{leaf}')
 
         leaf_hair_percent = float(np.count_nonzero(reconstructed_mask))/total_leaf_pixels
 
-        new_row = {"Leaf Id": leaf[:-4], "Landing Area %": 1 - leaf_hair_percent}
+        new_row = {"Leaf Id": leaf[:-4], 
+                   "Leaf Hair %": leaf_hair_percent,
+                   "Landing Area %": 1 - leaf_hair_percent,
+                   }
 
         print(new_row)
 
         results_df = pd.concat([results_df, pd.DataFrame([new_row])], ignore_index=True)
+        results_df.to_excel(results, index=False)
 
     print(results_df)
-    results_df.to_excel(results, index=False)
             
 
 if __name__ == "__main__":

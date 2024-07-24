@@ -57,7 +57,7 @@ if __name__ == "__main__":
         print("Error loading image")
         exit()
     inverted_mask = cv2.bitwise_not(hair_mask | cv2.bitwise_not(background_mask))
-    circle_diameter = 8.1
+    circle_diameter = 12.5
     # Find hole sizes and get statistics
     number_of_circles, total_area, output_image = count_and_draw_fitting_circles(inverted_mask, circle_diameter)
     area_circles = np.pi * (circle_diameter / 2) ** 2 * number_of_circles
@@ -72,3 +72,10 @@ if __name__ == "__main__":
     
     # Save the result
     cv2.imwrite('fitted_circles.png', output_image)
+
+"""
+- Take leaf mask
+- invert leaf mask
+- create filtered masks
+
+"""
