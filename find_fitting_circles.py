@@ -16,7 +16,7 @@ def count_and_draw_fitting_circles(binary_image, circle_diameter):
     
     # Create an output image to draw the circles
     output_image = cv2.cvtColor(binary_image, cv2.COLOR_GRAY2BGR)
-    
+    circles_per_contour = []
     for contour in contours:
         # Create a mask for the current contour
         mask = np.zeros_like(binary_image)

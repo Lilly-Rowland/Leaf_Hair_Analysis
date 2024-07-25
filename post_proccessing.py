@@ -2,25 +2,25 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
-from crop_leaf import get_background_mask
+import numpy as np
+import math
+import cv2
+import time
 
-def count_and_draw_fitting_circles(binary_image, circle_diameter):
-    # Find contours in the binary image
-    pixel_diameter = circle_diameter/1.2
-    contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    circle_radius = pixel_diameter / 2
+def count_circles_per_hole(landing_area_mask, circle_diameter, contours):
+    circle_radius = circle_diameter / 2
     circle_area = np.pi * (circle_radius ** 2)
     
     total_area = 0
     total_circles = 0
     
     # Create an output image to draw the circles
-    output_image = cv2.cvtColor(binary_image, cv2.COLOR_GRAY2BGR)
-    
+    output_image = cv2.cvtColor(landing_area_mask, cv2.COLOR_GRAY2BGR)
+    circles_per_contour = []
     for contour in contours:
+        contour_circles = 0
         # Create a mask for the current contour
-        mask = np.zeros_like(binary_image)
+        mask = np.zeros_like(landing_area_mask)
         cv2.drawContours(mask, [contour], -1, 255, thickness=cv2.FILLED)
 
         contour_area = cv2.contourArea(contour)
@@ -40,104 +40,93 @@ def count_and_draw_fitting_circles(binary_image, circle_diameter):
                     mask[int(center[1]), int(center[0])] == 255):
                     # Check if the entire circle fits within the contour
                     if np.all(mask[int(center[1]-circle_radius):int(center[1]+circle_radius), int(center[0]-circle_radius):int(center[0]+circle_radius)] == 255)and \
-                       np.all(binary_image[int(center[1]-circle_radius):int(center[1]+circle_radius), int(center[0]-circle_radius):int(center[0]+circle_radius)] == 255):
+                       np.all(landing_area_mask[int(center[1]-circle_radius):int(center[1]+circle_radius), int(center[0]-circle_radius):int(center[0]+circle_radius)] == 255):
                         total_circles += 1
+                        contour_circles += 1
                         # Draw the circle on the output image
                         cv2.circle(output_image, (int(center[0]), int(center[1])), int(circle_radius), (0, 0, 255), 2)
+                    circles_per_contour.append(contour_circles)                
                 j += circle_diameter
             i += circle_diameter
     
-    {f"# Circles Fit (d={circle_diameter} uM)": total_circles,
-    f"Landing Area % (d={circle_diameter} uM)": ,
-    }
-    return total_circles, total_area, output_image
+    cv2.imwrite('fitted_circles.png', output_image)  # Optional: remove this if not needed
+    circles_per_contour = [num for num in circles_per_contour if num !=0]
+    return total_circles, circles_per_contour
 
-def count_circles_per_hole(landing_area_mask, circle_diameter):
-    #delete alter
-    output_image = cv2.cvtColor(landing_area_mask, cv2.COLOR_GRAY2BGR)
+def find_sizes(circle_counts, diameter):
+    sizes = []
+    circle_area = np.pi * (diameter/2.)**2
+    for count in circle_counts:
+        sizes.append(count * circle_area)
+    return sizes
+
+def calculate_stats(hole_sizes, diameter):
+    return {
+        f"Mean (d={diameter})": np.mean(hole_sizes),
+        f"Median (d={diameter})": np.median(hole_sizes),
+        f"Maximum (d={diameter})": np.max(hole_sizes),
+        f"Minimum (d={diameter})": np.min(hole_sizes),
+        f"Standard Deviation (d={diameter})": np.std(hole_sizes),
+        f"Skewness (d={diameter})": stats.skew(hole_sizes),
+        f"Mode (d={diameter})": stats.mode(hole_sizes)[0],
+        f"Q1 (d={diameter})": np.percentile(hole_sizes, 25),
+        f"Q2 (d={diameter})": np.percentile(hole_sizes, 75),
+    }
+
+def calculate_filtered_stats(circle_count, total_hair_pixels, total_leaf_pixels, diameter):
+    area = (np.pi * ((diameter / 1.2) / 2.) ** 2) * circle_count
+    unfiltered_landing_area = total_leaf_pixels - total_hair_pixels
+
+    return {f"Circle Count (d={diameter})": circle_count,
+     f"Landing Area % (d={diameter})": area / total_leaf_pixels,
+     f"Filtered Landing Area / Unfiltered Landing Area (d={diameter})": area / unfiltered_landing_area}
+
+def analyze_landing_areas(landing_area_mask, total_hair_pixels, total_leaf_pixels):
+    
+    # Get raw holes sizes
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(landing_area_mask, connectivity=8)
+    
+    raw_hole_sizes = stats[1:, cv2.CC_STAT_AREA]
+    
+    # Remove holes smaller than min size
+    min_size = 8
+    hole_sizes = raw_hole_sizes[raw_hole_sizes >= min_size]
+
+    circle_diameters = [30, 15]
     
     # List to store the count of circles fitting into each contour
     contours, _ = cv2.findContours(landing_area_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    circles_per_contour = []
-    
-    pixel_radius = circle_diameter/2
+    # Get circle counts for filtered masks
+    circle_count_1, circles_per_contour_1 = count_circles_per_hole(landing_area_mask, circle_diameters[0]/1.2, contours)
+    circle_count_2, circles_per_contour_2 = count_circles_per_hole(landing_area_mask, circle_diameters[1]/1.2, contours)
 
-    total_circles = 0
+    # Find filtered hole sizes
+    sizes_1 = find_sizes(circles_per_contour_1, circle_diameters[0])
+    sizes_2 = find_sizes(circles_per_contour_2, circle_diameters[1])
 
-    for contour in contours:
-        # Create a mask for the current contour
-        mask = np.zeros_like(landing_area_mask)
-        cv2.drawContours(mask, [contour], -1, 255, thickness=cv2.FILLED)
-        
-        # Find bounding box of the contour
-        x, y, w, h = cv2.boundingRect(contour)
-        
-        # Initialize the circle count for the current contour
-        contour_circle_count = 0
-        
-        # Fit circles within the bounding box
-        i = y
-        while i < y + h:
-            j = x
-            while j < x + w:
-                # Check if the circle is within the contour mask
-                center = (j + pixel_radius, i + pixel_radius)
-                if (center[0] + pixel_radius <= x + w and center[1] + pixel_radius <= y + h and
-                    mask[int(center[1]), int(center[0])] == 255):
-                    # Check if the entire circle fits within the contour
-                    if np.all(mask[int(center[1]-pixel_radius):int(center[1]+pixel_radius), int(center[0]-pixel_radius):int(center[0]+pixel_radius)] == 255) and \
-                       np.all(landing_area_mask[int(center[1]-pixel_radius):int(center[1]+pixel_radius), int(center[0]-pixel_radius):int(center[0]+pixel_radius)] == 255):
-                        total_circles += 1
-                        contour_circle_count += 1
-                        # Optional: Draw the circle on the output image
-                        cv2.circle(output_image, (int(center[0]), int(center[1])), int(pixel_radius), (0, 0, 255), 2)
-                j += pixel_radius*2
-            i += pixel_radius*2
+    result_data = {}
 
-        # Append the count of circles for the current contour
-        circles_per_contour.append(contour_circle_count)
-    
-    return total_circles, circles_per_contour
+    result_data.update(calculate_stats(hole_sizes, "n/a"))
 
-def analyze_landing_area(landing_area_mask):
-    circle_diameters = [4, 15]
-    filtered_mask_1 = create_filtered_masks(landing_area_mask, circle_diameters[0]/1.2)
-    filtered_mask_2 = create_filtered_masks(landing_area_mask, circle_diameters[1]/1.2)
+    result_data.update(calculate_filtered_stats(circle_count_1, total_hair_pixels, total_leaf_pixels, circle_diameters[0]))
+    result_data.update(calculate_stats(sizes_1, f"{circle_diameters[0]} uM"))
 
-    return {f"# Circles Fit (d={circle_diameters[0]*1.2} uM)": ,
-            f"# Circles Fit (d={circle_diameters[1]*1.2} uM)": ,
-            f"Landing Area % (d={circle_diameters[0]*1.2} uM)": ,
-            f"Landing Area % (d={circle_diameters[1]*1.2} uM)": ,
-            f"Mean (d={circle_diameters[0]*1.2} uM)": ,
-            f"Mean (d={circle_diameters[0]*1.2} uM)": ,
-            f"Diameter {circle_diameters[0]*1.2} uM": ,
-            }
+    result_data.update(calculate_filtered_stats(circle_count_2, total_hair_pixels, total_leaf_pixels, circle_diameters[1]))
+    result_data.update(calculate_stats(sizes_2, f"{circle_diameters[1]} uM"))
+
+
+    return result_data
 
 if __name__ == "__main__":
+    start_time = time.time()
     # Load the hair mask image
-    landing_area_mask = cv2.imread('whole_leaf_masks/reconstructed_mask_070-PI483178_13-93.png', cv2.IMREAD_GRAYSCALE)
-    analyze_landing_area(landing_area_mask=landing_area_mask)
-    circle_diameters = [4/1.2, 15/1.2]
+    landing_area_mask = cv2.imread('whole_leaf_masks/inverted_mask_072-PI483155_13-97.png', cv2.IMREAD_GRAYSCALE)
     
-    # Find hole sizes and get statistics
-    number_of_circles, total_area, output_image = count_and_draw_fitting_circles(inverted_mask, circle_diameter)
-    area_circles = np.pi * (circle_diameter / 2) ** 2 * number_of_circles
-    
-    print(f"num circles: {number_of_circles}\narea circles: {area_circles}\ntotal_area: {total_area}")
-    
-    # Display the result
-    plt.imshow(cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB))
-    plt.title('Fitted Circles')
-    plt.axis('off')
-    plt.show()
-    
-    # Save the result
-    cv2.imwrite('fitted_circles.png', output_image)
+    # Random values for total leaf hair pixels and total landing pixel for testing
+    stats_results = analyze_landing_areas(landing_area_mask, 10000, 20000)
+    print(stats_results)
 
-"""
-- Take leaf mask
-- invert leaf mask
-- create filtered masks
-
-"""
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Elapsed time: {elapsed_time:.2f} seconds")

@@ -30,7 +30,7 @@ def find_hole_sizes(hair_mask, background_mask):
     
     min_size = 8.1
     hole_sizes = hole_sizes[hole_sizes >= min_size]
-    hole_sizes = remove_outliers(hole_sizes)
+    
     # Calculate statistics
     mean_size = np.mean(hole_sizes)
     median_size = np.median(hole_sizes)
