@@ -1,3 +1,11 @@
+# load the model and get it all set up
+# Take leaf disk and separate it into tiles
+# generate mask for each tile
+# get total landing area %
+# calculate holei-ness?
+
+#take file of leafs
+#block leafs into 224 x 224 images for each analysis
 import torch
 import os
 import shutil
@@ -17,9 +25,6 @@ import matplotlib.pyplot as plt
 import cv2
 from post_proccessing import analyze_landing_areas
 import time
-import logging
-
-logging.basicConfig(filename='inferences.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
 
 # Dictionary mapping string keys to loss types
 LossTypes = {
@@ -30,7 +35,7 @@ LossTypes = {
 
 def load_model(arch, model_path, n_classes):
     if arch.lower() == "unet":
-        model = UNet(3, n_classes)  # Example: Replace with your UNet model instantiation
+        model = UNet(3, n_classes)
     elif arch.lower() == "nested_unet":
         model = NestedUNet(3, n_classes)
     elif arch.lower() == "deeplabv3":
@@ -119,7 +124,7 @@ def stitch_masks(tile_masks):
 #     #find sizes of different obect in image --> make array of the different sizes + do stats
 #     # mean, median, max size, min size, distribution, graph of distribution
 
-def main(image_dir, tile_dir, model, loss, results_path):
+def main(image_dir, tile_dir, model, loss, results):
 
     results_df = pd.DataFrame()
     all_data = []
@@ -129,16 +134,16 @@ def main(image_dir, tile_dir, model, loss, results_path):
     #     results_df = pd.read_excel(results)
 
     create_or_clear_directory(tile_dir)
-    print(os.listdir(image_dir))
+    count = 0 #DEBUG
     for leaf in os.listdir(image_dir):
-        print(leaf)
+        if count > 2: #DEBUG
+                break #DEBUG
         start_time = time.time()
         image_path = os.path.join(image_dir, leaf)
         background_mask = get_background_mask(image_path)
         total_leaf_pixels = np.count_nonzero(background_mask)
 
         if not (leaf.endswith(".png") or leaf.endswith(".jpg")) or leaf.count('_') == 0:
-            logging.error(f"{leaf[:-4]} has invalid name")
             continue  # Skip hidden or system directories
 
         create_or_clear_directory(tile_dir)
@@ -180,18 +185,15 @@ def main(image_dir, tile_dir, model, loss, results_path):
         results = {"Leaf Id": leaf[:-4], "Elapsed Time (sec)": elapsed_time}
         results.update(mask_stats)
 
-        logging.info(f"Finished Inference for {leaf[:-4]} | Time: {elapsed_time}")
         
         all_data.append(results)
+        count += 1 #DEBUG
 
-    results_df = pd.DataFrame(all_data)
+    results_df = pd.DataFrame(results)
 
     print(results_df)
 
-    if os.path.isfile(results_path):
-        os.remove(results_path)
-
-    results_df.to_excel(results_path, index=False)
+    results_df.to_excel(results, index=False)
             
 
 if __name__ == "__main__":
@@ -219,5 +221,3 @@ if __name__ == "__main__":
     model = load_model(arch, model_path, n_classes).to(device)
 
     main(image_dir, tile_dir, model, n_classes, results)
-
-#TO RUN: nohup python -u make_inferences.py > inferences.log &
