@@ -9,5 +9,5 @@ leaves_to_inference/
 whole_leaf_masks/
 cropped_leaves*/
 LAB_imgs/
-training_images/
+training_labelbox/
 background_masks/
