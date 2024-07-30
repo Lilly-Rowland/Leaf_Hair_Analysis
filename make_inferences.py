@@ -190,8 +190,11 @@ def main(image_dir, tile_dir, model, loss, results_path):
 
     if os.path.isfile(results_path):
         os.remove(results_path)
+    
+    print("Writing to excel")
 
     results_df.to_excel(results_path, index=False)
+
             
 
 if __name__ == "__main__":

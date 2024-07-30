@@ -1,11 +1,3 @@
-# load the model and get it all set up
-# Take leaf disk and separate it into tiles
-# generate mask for each tile
-# get total landing area %
-# calculate holei-ness?
-
-#take file of leafs
-#block leafs into 224 x 224 images for each analysis
 import torch
 import os
 import shutil
@@ -25,6 +17,9 @@ import matplotlib.pyplot as plt
 import cv2
 from post_proccessing import analyze_landing_areas
 import time
+import logging
+
+logging.basicConfig(filename='inferences.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
 
 # Dictionary mapping string keys to loss types
 LossTypes = {
@@ -35,7 +30,7 @@ LossTypes = {
 
 def load_model(arch, model_path, n_classes):
     if arch.lower() == "unet":
-        model = UNet(3, n_classes)
+        model = UNet(3, n_classes)  # Example: Replace with your UNet model instantiation
     elif arch.lower() == "nested_unet":
         model = NestedUNet(3, n_classes)
     elif arch.lower() == "deeplabv3":
@@ -124,7 +119,7 @@ def stitch_masks(tile_masks):
 #     #find sizes of different obect in image --> make array of the different sizes + do stats
 #     # mean, median, max size, min size, distribution, graph of distribution
 
-def main(image_dir, tile_dir, model, loss, results):
+def main(image_dir, tile_dir, model, loss, results_path):
 
     results_df = pd.DataFrame()
     all_data = []
@@ -134,16 +129,19 @@ def main(image_dir, tile_dir, model, loss, results):
     #     results_df = pd.read_excel(results)
 
     create_or_clear_directory(tile_dir)
-    count = 0 #DEBUG
+    
     for leaf in os.listdir(image_dir):
-        if count > 2: #DEBUG
-                break #DEBUG
+        leaf = "007-PI588601_15-11.png"
+        print(leaf)
         start_time = time.time()
         image_path = os.path.join(image_dir, leaf)
         background_mask = get_background_mask(image_path)
+        # mask_image = Image.fromarray(background_mask)  # Convert mask to a grayscale image
+        # mask_image.save(f"background_masks/mask_{leaf}")  # Save the mask image to the new location
         total_leaf_pixels = np.count_nonzero(background_mask)
 
         if not (leaf.endswith(".png") or leaf.endswith(".jpg")) or leaf.count('_') == 0:
+            logging.error(f"{leaf[:-4]} has invalid name")
             continue  # Skip hidden or system directories
 
         create_or_clear_directory(tile_dir)
@@ -158,8 +156,19 @@ def main(image_dir, tile_dir, model, loss, results):
     
         for tile in os.listdir(tile_dir):
             tile_path = os.path.join(tile_dir, tile)
+            
             mask = generate_mask(model, tile_path, transform, device, loss)
             mask_name = os.path.basename(tile_path)
+            
+            if np.sum(mask > 0) > 50:
+                        # Save the tile image
+                tile_image = Image.open(tile_path)  # Open the tile image
+                tile_image.save(f"delete_soon/tile_{tile}")  # Save the tile image to the new location
+                
+                # Convert and save the mask image
+                mask_image = Image.fromarray(mask * 255)  # Convert mask to a grayscale image
+                mask_image.save(f"delete_soon/mask_{mask_name}")  # Save the mask image to the new location
+
 
             row = int(mask_name.split('_')[2])  # Extract row from mask name
             col = int(mask_name.split('_')[3][:-4])  # Extract col from mask name
@@ -175,8 +184,9 @@ def main(image_dir, tile_dir, model, loss, results):
    
         reconstructed_mask = reconstructed_mask & background_mask
 
+
         landing_area_mask = cv2.bitwise_not((reconstructed_mask * 255).astype(np.uint8) | cv2.bitwise_not(background_mask))
-        
+        cv2.imwrite("007_la_mask.png", landing_area_mask)
         mask_stats = analyze_landing_areas(landing_area_mask, total_hair_pixels, total_leaf_pixels)
         
         end_time = time.time()
@@ -185,15 +195,19 @@ def main(image_dir, tile_dir, model, loss, results):
         results = {"Leaf Id": leaf[:-4], "Elapsed Time (sec)": elapsed_time}
         results.update(mask_stats)
 
+        logging.info(f"Finished Inference for {leaf[:-4]} | Time: {elapsed_time}")
         
         all_data.append(results)
-        count += 1 #DEBUG
+        break
 
-    results_df = pd.DataFrame(results)
+    results_df = pd.DataFrame(all_data)
 
     print(results_df)
 
-    results_df.to_excel(results, index=False)
+    if os.path.isfile(results_path):
+        os.remove(results_path)
+
+    results_df.to_excel(results_path, index=False)
             
 
 if __name__ == "__main__":
@@ -221,3 +235,5 @@ if __name__ == "__main__":
     model = load_model(arch, model_path, n_classes).to(device)
 
     main(image_dir, tile_dir, model, n_classes, results)
+
+#TO RUN: nohup python -u make_inferences.py > inferences.log &

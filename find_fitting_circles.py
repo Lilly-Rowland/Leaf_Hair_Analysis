@@ -42,7 +42,7 @@ def count_and_draw_fitting_circles(binary_image, circle_diameter):
                        np.all(binary_image[int(center[1]-circle_radius):int(center[1]+circle_radius), int(center[0]-circle_radius):int(center[0]+circle_radius)] == 255):
                         total_circles += 1
                         # Draw the circle on the output image
-                        cv2.circle(output_image, (int(center[0]), int(center[1])), int(circle_radius), (0, 0, 255), 2)
+                        cv2.circle(output_image, (int(center[0]), int(center[1])), int(circle_radius), (0, 0, 255), 3)
                 j += circle_diameter
             i += circle_diameter
     
@@ -50,14 +50,14 @@ def count_and_draw_fitting_circles(binary_image, circle_diameter):
 
 if __name__ == "__main__":
     # Load the hair mask image
-    hair_mask = cv2.imread('whole_leaf_masks/reconstructed_mask_070-PI483178_13-93.png', cv2.IMREAD_GRAYSCALE)
-    background_mask = get_background_mask("leaves_to_inference/070-PI483178_13-93.png")
+    hair_mask = cv2.imread('leaves_to_inference/007-PI588601_15-11.png', cv2.IMREAD_GRAYSCALE)
+    background_mask = get_background_mask("whole_leaf_masks/reconstructed_mask_007-PI588601_15-11.png")
     # Check if the image was loaded correctly
     if hair_mask is None:
         print("Error loading image")
         exit()
     inverted_mask = cv2.bitwise_not(hair_mask | cv2.bitwise_not(background_mask))
-    circle_diameter = 12.5
+    circle_diameter = 15
     # Find hole sizes and get statistics
     number_of_circles, total_area, output_image = count_and_draw_fitting_circles(inverted_mask, circle_diameter)
     area_circles = np.pi * (circle_diameter / 2) ** 2 * number_of_circles
