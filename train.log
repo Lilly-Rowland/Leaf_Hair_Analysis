@@ -1,0 +1,63 @@
+loading annotations into memory...
+Done (t=0.07s)
+creating index...
+index created!
+Epoch [1/200], Train Loss: 0.2996, Time: 22.44 seconds
+Epoch [2/200], Train Loss: 0.2064, Time: 22.55 seconds
+Epoch [3/200], Train Loss: 0.1899, Time: 22.94 seconds
+Epoch [4/200], Train Loss: 0.1794, Time: 23.14 seconds
+Epoch [5/200], Train Loss: 0.1820, Time: 23.41 seconds
+Epoch [6/200], Train Loss: 0.1659, Time: 23.44 seconds
+Epoch [7/200], Train Loss: 0.1702, Time: 23.52 seconds
+Epoch [8/200], Train Loss: 0.1808, Time: 23.47 seconds
+Epoch [9/200], Train Loss: 0.1650, Time: 23.42 seconds
+Epoch [10/200], Train Loss: 0.1555, Time: 23.42 seconds
+Epoch [11/200], Train Loss: 0.1580, Time: 23.48 seconds
+Epoch [12/200], Train Loss: 0.1693, Time: 23.47 seconds
+Epoch [13/200], Train Loss: 0.1654, Time: 23.49 seconds
+Epoch [14/200], Train Loss: 0.1603, Time: 23.53 seconds
+Epoch [15/200], Train Loss: 0.1496, Time: 23.47 seconds
+Epoch [16/200], Train Loss: 0.1526, Time: 23.56 seconds
+Epoch [17/200], Train Loss: 0.1385, Time: 23.60 seconds
+Epoch [18/200], Train Loss: 0.1417, Time: 23.49 seconds
+Epoch [19/200], Train Loss: 0.1333, Time: 23.46 seconds
+Epoch [20/200], Train Loss: 0.1436, Time: 23.41 seconds
+Epoch [21/200], Train Loss: 0.1534, Time: 23.46 seconds
+Epoch [22/200], Train Loss: 0.1528, Time: 23.50 seconds
+Epoch [23/200], Train Loss: 0.1534, Time: 23.37 seconds
+Epoch [24/200], Train Loss: 0.1352, Time: 23.37 seconds
+Epoch [25/200], Train Loss: 0.1354, Time: 23.36 seconds
+Epoch [26/200], Train Loss: 0.1477, Time: 23.46 seconds
+Epoch [27/200], Train Loss: 0.1284, Time: 23.39 seconds
+Epoch [28/200], Train Loss: 0.1331, Time: 23.37 seconds
+Epoch [29/200], Train Loss: 0.1376, Time: 23.42 seconds
+Epoch [30/200], Train Loss: 0.1292, Time: 23.46 seconds
+Epoch [31/200], Train Loss: 0.1181, Time: 23.42 seconds
+Epoch [32/200], Train Loss: 0.1233, Time: 23.37 seconds
+Epoch [33/200], Train Loss: 0.1184, Time: 23.47 seconds
+Epoch [34/200], Train Loss: 0.1145, Time: 23.49 seconds
+Epoch [35/200], Train Loss: 0.1147, Time: 23.41 seconds
+Epoch [36/200], Train Loss: 0.1196, Time: 23.43 seconds
+Epoch [37/200], Train Loss: 0.1248, Time: 23.46 seconds
+Epoch [38/200], Train Loss: 0.1436, Time: 23.38 seconds
+Epoch [39/200], Train Loss: 0.1253, Time: 23.31 seconds
+Epoch [40/200], Train Loss: 0.1077, Time: 23.34 seconds
+Epoch [41/200], Train Loss: 0.1116, Time: 23.30 seconds
+Epoch [42/200], Train Loss: 0.1082, Time: 23.35 seconds
+Epoch [43/200], Train Loss: 0.1143, Time: 23.36 seconds
+Epoch [44/200], Train Loss: 0.1060, Time: 23.37 seconds
+Epoch [45/200], Train Loss: 0.1061, Time: 23.31 seconds
+Epoch [46/200], Train Loss: 0.1078, Time: 23.42 seconds
+Epoch [47/200], Train Loss: 0.1069, Time: 23.40 seconds
+Epoch [48/200], Train Loss: 0.0928, Time: 23.37 seconds
+Epoch [49/200], Train Loss: 0.1094, Time: 23.41 seconds
+Epoch [50/200], Train Loss: 0.1162, Time: 23.34 seconds
+Epoch [51/200], Train Loss: 0.1051, Time: 23.36 seconds
+Epoch [52/200], Train Loss: 0.0940, Time: 23.29 seconds
+Epoch [53/200], Train Loss: 0.0897, Time: 23.36 seconds
+Epoch [54/200], Train Loss: 0.0959, Time: 23.43 seconds
+Epoch [55/200], Train Loss: 0.1097, Time: 23.39 seconds
+Epoch [56/200], Train Loss: 0.1873, Time: 23.32 seconds
+Epoch [57/200], Train Loss: 0.1559, Time: 23.33 seconds
+Epoch [58/200], Train Loss: 0.1470, Time: 23.40 seconds
+Early stopping triggered. No improvement in validation loss for 20 epochs.

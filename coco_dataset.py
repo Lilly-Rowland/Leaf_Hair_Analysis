@@ -31,21 +31,51 @@ class CocoDataset(Dataset):
         img_id = self.img_ids[idx]
         ann_ids = self.coco.getAnnIds(imgIds=img_id)
         anns = self.coco.loadAnns(ann_ids)
-        img_info = self.coco.loadImgs(img_id)[0]
 
+        img_info = self.coco.loadImgs(img_id)[0] # changed to put img_id in []
+ 
         # Load image
-        img_path = os.path.join(self.img_dir, img_info['path'])
+        # img_path = os.path.join(self.img_dir, img_info['path'])
+        img_path = os.path.join(self.img_dir, f"{img_info['file_name']}.png")
         image = Image.open(img_path).convert("RGB")
 
         # Create empty mask
         mask = np.zeros((img_info['height'], img_info['width']), dtype=np.uint8)
 
         # Create mask from annotations
+        filtered_segmentation = []
         if anns:
             for ann in anns:
-                mask = np.maximum(self.coco.annToMask(ann) * ann['category_id'], mask)
+                # segmentation = ann.get('segmentation', [])
+                # count = 0
+                # for item in segmentation:
+                #     if len(item) > 2:
+                #         filtered_segmentation.append(item)
+                #     count += 1
+                #     if count > 50:
+                #         filtered_segmentation = segmentation
+                #         break
+
+                # if len(filtered_segmentation) != 0:
+                #     ann['segmentation'] = filtered_segmentation
+                #     print(type(ann))
+                segmentation = ann.get('segmentation', [])
+                if len(ann.get('segmentation', [])) != 0:
+                    if len(segmentation) < 50:
+                        ann['segmentation'] = [inner_list for inner_list in segmentation if len(inner_list) >= 6]
+                        try:
+                            ann_mask = self.coco.annToMask(ann)
+                            if ann_mask is not None:
+                                mask = np.maximum(ann_mask * ann['category_id'], mask)
+                        except (TypeError, IndexError) as e:
+                            #print(f"Skipping annotation {img_id} due to error: {e}")
+                            continue
+                    # ann_mask = self.coco.annToMask(ann)
+                    # mask = np.maximum(ann_mask * ann['category_id'], mask)
 
         mask = np.clip(mask, 0, 1)
+       
+        
         #mask = Image.fromarray(mask)
         # Apply transformations
         # Apply transformations
@@ -61,8 +91,8 @@ def transform(image, mask):
         T.RandomHorizontalFlip(),
         T.RandomVerticalFlip(),
         T.ToTensor(),
-        T.Normalize(mean=[0.5380782065015497, 0.6146645541178255, 0.4624397479931463],
-                    std=[0.12672495205043693, 0.12178723849002748, 0.1999076104405415]),
+        T.Normalize(mean=[0.35860088, 0.4009117,  0.32194334],
+                    std=[0.18724611, 0.19575961, 0.23898095]),
     ])
 
     transform_mask = T.Compose([

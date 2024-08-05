@@ -195,8 +195,7 @@ def main(image_dir, model, loss, results):
         
         plt.axis('off')
         plt.imshow(reconstructed_mask, cmap='gray')
-        plt.show()
-        plt.savefig(f'whole_leaf_masks/reconstructed_mask_{leaf}', bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'labelbox_whole_leaf_mask/reconstructed_mask_{leaf}', bbox_inches='tight', pad_inches=0)
         
         # Do more calculations
         leaf_hair_percent = float(total_hair_pixels) / leaf_pixels
@@ -208,14 +207,13 @@ def main(image_dir, model, loss, results):
     results_df.to_excel(results, index=False)
 
 if __name__ == "__main__":
-    model_path = 'models/deeplabv3_dice_balanced_bs_32_seed_555_epoch_26.pth'
-
+    model_path = 'models/labelbox_data_DeepLabV3_dice_balanced_bs_32_seed_201_epoch_38.pth'
     image_dir = "leaves_to_inference"
+    tile_dir = "/tmp/temp_tiles"
 
     arch = "deeplabv3"
     loss = "dice"
-
-    results = "hair_model_results.xlsx"
+    results = "ignore.xlsx"
 
     n_classes = LossTypes[loss]
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

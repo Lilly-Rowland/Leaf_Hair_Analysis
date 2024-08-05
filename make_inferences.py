@@ -82,30 +82,30 @@ def generate_mask(model, image_path, transform, device, loss):
     return mask
 
 
-def stitch_masks(tile_masks):
+def stitch_masks(tile_masks, leaf = "leaf"):
     # Create an empty mask array to combine all masks
-    image_size = [6144, 9216]
+    image_size = [5502, 8254]
     stitched_mask = np.zeros(image_size, dtype=np.uint8)
 
     # Paste each mask into the stitched mask at the correct position
     for item in tile_masks:
         mask = item["mask"]
-        x_start = item["col"] * 256  # Calculate start x-coordinate in stitched mask
-        y_start = item["row"] * 256  # Calculate start y-coordinate in stitched mask
+        x_start = item["col"] * 224  # Calculate start x-coordinate in stitched mask
+        y_start = item["row"] * 224  # Calculate start y-coordinate in stitched mask
 
         # Determine the end coordinates within the stitched mask
-        x_end = x_start + 256
-        y_end = y_start + 256
+        x_end = x_start + 224
+        y_end = y_start + 224
 
         # Skip mask if it is cropped (dimensions do not match expected size)
-        if mask.shape[0] != 256 or mask.shape[1] != 256:
+        if mask.shape[0] != 224 or mask.shape[1] != 224:
             continue
         
         # Overlay the mask onto the stitched mask
         stitched_mask[y_start:y_end, x_start:x_end] = mask
     
     # Clip the values to ensure they are in the valid range for uint8
-    stitched_mask = np.clip(stitched_mask, 0, 255).astype(np.uint8)
+    stitched_mask = np.clip(stitched_mask*255, 0, 255).astype(np.uint8)
 
     # Create a PIL Image from the stitched mask array
     stitched_image = Image.fromarray(stitched_mask)
@@ -129,9 +129,9 @@ def main(image_dir, tile_dir, model, loss, results_path):
     #     results_df = pd.read_excel(results)
 
     create_or_clear_directory(tile_dir)
-    print(os.listdir(image_dir))
+    print("Leaves to be inference:\n", os.listdir(image_dir))
     for leaf in os.listdir(image_dir):
-        print(leaf)
+        print("Current leaf: ", leaf)
         start_time = time.time()
         image_path = os.path.join(image_dir, leaf)
         background_mask = get_background_mask(image_path)
@@ -166,13 +166,20 @@ def main(image_dir, tile_dir, model, loss, results_path):
             tile_paths.append(tile_path)
 
 
-        reconstructed_mask = stitch_masks(tile_masks).resize((8254, 5502),Image.NEAREST)
+        reconstructed_mask = stitch_masks(tile_masks, leaf).resize((8254, 5502),Image.NEAREST)
+
+        reconstructed_mask = np.array(reconstructed_mask)
    
         reconstructed_mask = reconstructed_mask & background_mask
 
         landing_area_mask = cv2.bitwise_not((reconstructed_mask * 255).astype(np.uint8) | cv2.bitwise_not(background_mask))
         
         mask_stats = analyze_landing_areas(landing_area_mask, total_hair_pixels, total_leaf_pixels)
+        print(mask_stats)
+        # Save leaf mask
+
+        reconstructed_mask_image = Image.fromarray(reconstructed_mask)
+        reconstructed_mask_image.save(f'labelbox_whole_leaf_mask/reconstructed_mask_{leaf}')
         
         end_time = time.time()
         elapsed_time = end_time - start_time
@@ -198,8 +205,31 @@ def main(image_dir, tile_dir, model, loss, results_path):
             
 
 if __name__ == "__main__":
-    model_path = 'models/deeplabv3_dice_balanced_bs_32_seed_555_epoch_26.pth'
+    # model_path = 'models/deeplabv3_dice_balanced_bs_32_seed_555_epoch_26.pth'
 
+    # image_dir = "leaves_to_inference"
+    # tile_dir = "/tmp/temp_tiles"
+
+    # arch = "deeplabv3"
+    # loss = "dice"
+
+    # results = "hair_model_results.xlsx"
+
+    # n_classes = LossTypes[loss]
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # # Define the same transforms used during training
+    # transform = T.Compose([
+    #     T.Resize((256, 256)),
+    #     T.ToTensor(),
+    #     T.Normalize(mean=[0.5380782065015497, 0.6146645541178255, 0.4624397479931463],
+    #                 std=[0.12672495205043693, 0.12178723849002748, 0.1999076104405415]),
+    # ])
+
+    # model = load_model(arch, model_path, n_classes).to(device)
+
+    # main(image_dir, tile_dir, model, n_classes, results)
+    model_path = 'models/labelbox_data_DeepLabV3_dice_balanced_bs_64_seed_201_epoch_25.pth'
     image_dir = "leaves_to_inference"
     tile_dir = "/tmp/temp_tiles"
 
@@ -213,10 +243,10 @@ if __name__ == "__main__":
 
     # Define the same transforms used during training
     transform = T.Compose([
-        T.Resize((256, 256)),
+        T.Resize((224, 224)),
         T.ToTensor(),
-        T.Normalize(mean=[0.5380782065015497, 0.6146645541178255, 0.4624397479931463],
-                    std=[0.12672495205043693, 0.12178723849002748, 0.1999076104405415]),
+        T.Normalize(mean=[0.35860088, 0.4009117,  0.32194334],
+                    std=[0.18724611, 0.19575961, 0.23898095])
     ])
 
     model = load_model(arch, model_path, n_classes).to(device)

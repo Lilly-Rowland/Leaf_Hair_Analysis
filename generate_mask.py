@@ -63,7 +63,7 @@ def preprocess_image(image_path, transform):
     image = transform(image).unsqueeze(0)  # Add batch dimension
     return image
 
-# Post-process the output mask
+# Post-process the oxutput mask
 def postprocess_mask(mask, isXE, threshold=0.5):
     mask = mask.squeeze().cpu()  # Remove batch dimension and move to CPU
     
@@ -115,7 +115,8 @@ def visualize_mask(image_path, generated_mask, ground_truth_mask):
 
 # Main function to load model and generate masks for all images in a folder
 if __name__ == "__main__":
-    model_path = 'models/deeplabv3_dice_balanced_bs_32_seed_555_epoch_26.pth'
+    model_path = 'models/labelbox_data_DeepLabV3_dice_balanced_bs_32_seed_201_epoch_38.pth'
+    
     folder_path = 'tester_images'  # Folder containing multiple images
     annotation_file = 'Data/combined_coco.json'  # Path to your COCO annotation file
     arch = "deeplabv3"
@@ -125,12 +126,18 @@ if __name__ == "__main__":
         n_classes = 2
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Define the same transforms used during training
+    # # Define the same transforms used during training
+    # transform = T.Compose([
+    #     T.Resize((256, 256)),
+    #     T.ToTensor(),
+    #     T.Normalize(mean=[0.5380782065015497, 0.6146645541178255, 0.4624397479931463],
+    #                 std=[0.12672495205043693, 0.12178723849002748, 0.1999076104405415]),
+    # ])
     transform = T.Compose([
-        T.Resize((256, 256)),
+        T.Resize((224, 224)),
         T.ToTensor(),
-        T.Normalize(mean=[0.5380782065015497, 0.6146645541178255, 0.4624397479931463],
-                    std=[0.12672495205043693, 0.12178723849002748, 0.1999076104405415]),
+        T.Normalize(mean=[0.35860088, 0.4009117,  0.32194334],
+                    std=[0.18724611, 0.19575961, 0.23898095])
     ])
 
     model = load_model(arch, model_path, n_classes).to(device)

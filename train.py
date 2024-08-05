@@ -99,7 +99,7 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, name, cl
         epoch_time = time.time() - start_time
         train_loss = running_loss / len(train_loader)
         train_losses.append(train_loss)
-        #print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Time: {epoch_time:.2f} seconds")
+        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Time: {epoch_time:.2f} seconds")
 
         model.eval()
         val_running_loss = 0.0
@@ -225,7 +225,7 @@ def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=3
     else:
         print("Invalid model")
 
-    name = f"{arch}_{loss}_{'balanced' if balance else 'unbalanced'}_bs_{batch_size}_seed_{seed}"
+    name = f"labelbox_data_{arch}_{loss}_{'balanced' if balance else 'unbalanced'}_bs_{batch_size}_seed_{seed}"
     saved_name = f"models/{name}.pth"
 
     trained_model, train_losses, val_losses, avg_test_loss = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, name=name, class_weights=class_weights, num_epochs = num_epochs, gpu_num = gpu_index)
@@ -242,13 +242,14 @@ if __name__ == "__main__":
 
     #run_name = "results/learning_curves/segnet_xe_transformed_seed_201.png"
 
-    loss = "xe"
+    loss = "dice"
 
-    arch = "segnet" #unet or nested unet or deeplabv3 or segnet
+    arch = "DeepLabV3" #unet or nested unet or deeplabv3 or segnet
 
     balance = True
 
-    dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
+    dataset = CocoDataset(img_dir="training_images", ann_file="labelbox_coco.json", transform=transform)
+    #dataset = CocoDataset(img_dir="training_labelbox/training_images", ann_file="training_labelbox/labelbox_coco.json", transform=transform)
 
 
-    run_train(dataset, loss, arch=arch, balance=balance)
+    run_train(dataset, loss, arch=arch, balance=balance, num_epochs = 200, batch_size=64)

@@ -7,6 +7,12 @@ from skimage.draw import polygon
 from tqdm import tqdm
 import cv2
 import re
+import time
+
+MAX_REQUESTS_PER_MINUTE = 4900
+SECONDS_PER_MINUTE = 60
+TIME_INTERVAL = SECONDS_PER_MINUTE / MAX_REQUESTS_PER_MINUTE
+last_request_time = time.time()
 
 # Convert numpy types to native Python types
 def convert_np_types(obj):
@@ -18,7 +24,16 @@ def convert_np_types(obj):
         return float(obj)
     return obj
 
+def rate_limit():
+    global last_request_time
+    current_time = time.time()
+    elapsed_time = current_time - last_request_time
+    if elapsed_time < TIME_INTERVAL:
+        time.sleep(TIME_INTERVAL - elapsed_time)
+    last_request_time = time.time()
+
 def download_image(url, local_path, headers):
+    rate_limit() 
     try:
         response = requests.get(url, stream=True)
         # Print status code and URL for debugging
@@ -31,7 +46,7 @@ def download_image(url, local_path, headers):
             print(f"Failed to download {url}. Status code: {response.status_code}. Response text: {response.text}")
 
     except requests.exceptions.RequestException as e:
-        print(f"Request failed: {e}")
+        print(f"Request failed")
 
 def download_mask(url, local_path, headers):
     try:
@@ -68,7 +83,10 @@ def convert_labelbox_to_coco(labelbox_json_path, coco_json_path, image_dir, head
     
     try:
         with open(labelbox_json_path) as f:
+            image_id = 0
+                
             for line in f:
+                image_id += 1
                 try:
                     labelbox_data = json.loads(line.strip())
                 except json.JSONDecodeError as e:
@@ -76,7 +94,7 @@ def convert_labelbox_to_coco(labelbox_json_path, coco_json_path, image_dir, head
                     continue
 
                 data_row = labelbox_data.get("data_row", {})
-                image_id = data_row.get("id")
+                #image_id = data_row.get("id")
                 image_url = data_row.get("row_data")
                 if not image_url:
                     continue
@@ -98,6 +116,17 @@ def convert_labelbox_to_coco(labelbox_json_path, coco_json_path, image_dir, head
 
                 labels = labelbox_data.get("projects").get("clxudv7ni0aw9070ybott5mc7").get("labels")
                 for label in labels:
+                    if len(label["annotations"]["objects"]) < 1:
+
+                        coco_format["annotations"].append({
+                                    "id": image_id,
+                                    "image_id": image_id,
+                                    "category_id": category_id,
+                                    "segmentation": [],
+                                    "area": 0,
+                                    "iscrowd": 0
+                                })    
+
                     for obj in label["annotations"]["objects"]:
                         if "composite_mask" in obj:
                             mask_url = f"{obj['composite_mask']['url']}"
@@ -122,13 +151,14 @@ def convert_labelbox_to_coco(labelbox_json_path, coco_json_path, image_dir, head
                             
 
                                 coco_format["annotations"].append({
-                                    "id": len(coco_format["annotations"]) + 1,
+                                    "id": image_id,
                                     "image_id": image_id,
                                     "category_id": category_id,
                                     "segmentation": polygons,
                                     "area": int(np.sum(mask_array)),
                                     "iscrowd": 0
                                 })
+
                         else:
                             print(f"Unsupported mask format: {mask_url}")
 

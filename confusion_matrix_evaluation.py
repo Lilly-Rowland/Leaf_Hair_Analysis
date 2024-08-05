@@ -33,6 +33,7 @@ def plot_confusion_matrix(cm, classes, name = "conf_mat.png"):
     plt.xlabel('Predicted Labels')
     plt.ylabel('True Labels')
     plt.title('Confusion Matrix')
+    print(name)
     plt.savefig(name)
     #plt.show()
 
