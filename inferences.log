@@ -94,63 +94,28 @@
 2024-08-06 15:26:33,669 - INFO - Finished Inference for 233-PI483154_13-91 | Time: 70.92029762268066
 2024-08-06 15:27:46,549 - INFO - Finished Inference for 154-PI588558_14-89 | Time: 72.88049817085266
 2024-08-06 15:28:41,084 - INFO - Finished Inference for 102-PI588464_15-58 | Time: 54.53456950187683
-96_15-35.png
-Current leaf:  092-PI483138_16-57.png
-Current leaf:  050-PI483170_13-53.png
-Current leaf:  174-PI588543_15-19.png
-Current leaf:  197-PI588274_13-17.png
-Current leaf:  290-PI588528_14-15.png
-Current leaf:  004-PI588478_15-3.png
-Current leaf:  318-PI588558_14-89.png
-Current leaf:  142-PI348889_14-57.png
-Current leaf:  119-PI483186_14-1.png
-Current leaf:  244-PI588584_16-27.png
-Current leaf:  250-PI588143_16-41.png
-Current leaf:  273-PI588620_15-77.png
-Current leaf:  189-GVIT1728_15-51.png
-Current leaf:  235-PI483130_13-95.png
-Current leaf:  051-PI483181_13-55.png
-Current leaf:  239-PI483152_13-103.png
-Current leaf:  194-PI588439_13-11.png
-Current leaf:  285-PI483157_14-5.png
-Current leaf:  136-PI588576_14-45.png
-Current leaf:  238-PI588565_13-101.png
-Current leaf:  049-PI483145_13-51.png
-Current leaf:  247-PI483184_16-33.png
-Current leaf:  152-PI588555_14-85.png
-Current leaf:  130-PI588491_14-23.png
-Current leaf:  014-PI588594_15-27.png
-Current leaf:  084-PI483188_16-35.png
-Current leaf:  029-PI588563_13-9.png
-Current leaf:  319-PI588553_14-91.png
-Current leaf:  267-PI588617_15-59.png
-Current leaf:  075-PI483152_13-103.png
-Current leaf:  264-PI588467_16-77.png
-Current leaf:  257-PI588372_16-59.png
-Current leaf:  287-PI483180_14-9.png
-Current leaf:  254-PI483162_16-53.png
-Current leaf:  080-PI588584_16-27.png
-Current leaf:  313-PI588561_14-77.png
-Current leaf:  232-PI597106_13-89.png
-Current leaf:  091-PI483151_16-55.png
-Current leaf:  289-PI588533_14-13.png
-Current leaf:  074-PI588565_13-101.png
-Current leaf:  299-PI588574_14-43.png
-Current leaf:  072-PI483155_13-97.png
-Current leaf:  027-PI483171_13-4.png
-Current leaf:  327-PI588566_14-107.png
-Current leaf:  263-PI588529_16-73.png
-Current leaf:  272-PI588618_15-76.png
-Current leaf:  104-PI588619_15-61.png
-Current leaf:  068-PI597106_13-89.png
-Current leaf:  175-PI588463_15-21.png
-Current leaf:  001-PI588568_13-107.png
-Current leaf:  009-PI588470_15-17.png
-Current leaf:  065-PI483173_13-83.png
-Current leaf:  022-PI588623_15-45.png
-Current leaf:  071-PI483130_13-95.png
-Current leaf:  046-PI483163_13-43.png
-Current leaf:  326-PI200569_14-106.png
+2024-08-06 15:29:54,350 - INFO - Finished Inference for 307-PI348888_14-59 | Time: 73.26510572433472
+2024-08-06 15:31:10,405 - INFO - Finished Inference for 117-PI588365_15-107 | Time: 76.05481505393982
+2024-08-06 15:32:22,084 - INFO - Finished Inference for 037-PI588572_13-25 | Time: 71.67839765548706
+2024-08-06 15:33:37,875 - INFO - Finished Inference for 231-PI483167_13-87 | Time: 75.79101991653442
+2024-08-06 15:34:52,394 - INFO - Finished Inference for 012-PI588471_15-23 | Time: 74.51856279373169
+2024-08-06 15:35:44,700 - INFO - Finished Inference for 021-PI588611_15-43 | Time: 52.30535578727722
+2024-08-06 15:36:34,295 - INFO - Finished Inference for 286-PI588466_14-8 | Time: 49.594558000564575
+2024-08-06 15:37:10,239 - INFO - Finished Inference for 265-PI588552_15-53 | Time: 35.9443793296814
+2024-08-06 15:38:24,103 - INFO - Finished Inference for 283-PI483186_14-1 | Time: 73.86331152915955
+2024-08-06 15:39:38,735 - INFO - Finished Inference for 276-GVIT1730_15-87 | Time: 74.63170862197876
+2024-08-06 15:40:53,466 - INFO - Finished Inference for 083-PI483184_16-33 | Time: 74.73047494888306
+2024-08-06 15:42:06,875 - INFO - Finished Inference for 140-PI588520_14-54 | Time: 73.40844869613647
+2024-08-06 15:42:53,761 - INFO - Finished Inference for 115-PI597274_15-101 | Time: 46.885544776916504
+2024-08-06 15:44:11,003 - INFO - Finished Inference for 169-PI588133_15-5 | Time: 77.24207210540771
+2024-08-06 15:45:14,537 - INFO - Finished Inference for 059-PI483150_13-71 | Time: 63.53336691856384
+2024-08-06 15:46:02,279 - INFO - Finished Inference for 145-PI588539_14-65 | Time: 47.741862773895264
+2024-08-06 15:47:11,893 - INFO - Finished Inference for 256-PI483138_16-57 | Time: 69.6139612197876
+2024-08-06 15:48:29,127 - INFO - Finished Inference for 134-PI588567_14-37 | Time: 77.23332023620605
+2024-08-06 15:49:42,468 - INFO - Finished Inference for 248-PI483188_16-35 | Time: 73.3404495716095
+2024-08-06 15:50:55,381 - INFO - Finished Inference for 156-PI341060_14-93 | Time: 72.91295099258423
+2024-08-06 15:51:40,687 - INFO - Finished Inference for 279-PI597274_15-101 | Time: 45.30514192581177
+-PI200569_14-106.png
 Current leaf:  241-PI597270_16-4.png
 Current leaf:  041-PI588273_13-33.png
 Current leaf:  324-GVIT1732_14-101.png
@@ -166,3 +131,24 @@ Current leaf:  233-PI483154_13-91.png
 Current leaf:  154-PI588558_14-89.png
 Current leaf:  102-PI588464_15-58.png
 Current leaf:  307-PI348888_14-59.png
+Current leaf:  117-PI588365_15-107.png
+Current leaf:  037-PI588572_13-25.png
+Current leaf:  231-PI483167_13-87.png
+Current leaf:  012-PI588471_15-23.png
+Current leaf:  021-PI588611_15-43.png
+Current leaf:  286-PI588466_14-8.png
+Current leaf:  265-PI588552_15-53.png
+Current leaf:  283-PI483186_14-1.png
+Current leaf:  276-GVIT1730_15-87.png
+Current leaf:  083-PI483184_16-33.png
+Current leaf:  140-PI588520_14-54.png
+Current leaf:  115-PI597274_15-101.png
+Current leaf:  169-PI588133_15-5.png
+Current leaf:  059-PI483150_13-71.png
+Current leaf:  145-PI588539_14-65.png
+Current leaf:  256-PI483138_16-57.png
+Current leaf:  134-PI588567_14-37.png
+Current leaf:  248-PI483188_16-35.png
+Current leaf:  156-PI341060_14-93.png
+Current leaf:  279-PI597274_15-101.png
+Current leaf:  066-PI588401_13-86.png

@@ -1,0 +1,7 @@
+{
+    "project_name": "leaf_hair_analysis",
+    "image_name": "myproject_image",
+    "entry_file": "app.py",
+    "gpus": 8,
+    "mem": "16G"
+}
