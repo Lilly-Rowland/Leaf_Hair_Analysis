@@ -12,3 +12,5 @@ LAB_imgs/
 training_labelbox/
 background_masks/
 training_images/
+labelbox_whole_leaf_mask/
+leaf_venv/
