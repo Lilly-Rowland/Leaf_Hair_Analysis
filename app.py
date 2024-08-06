@@ -55,8 +55,13 @@ def infer(args):
     print(f"  --results-folder: {args.results_folder}")
     print(f"  --use-model-1: {args.use_model_1}")
     print(f"  --make-hair-mask: {args.make_hair_mask}")
+
+    if args.use_model_1:
+        model_path = "models/deeplabv3_dice_balanced_bs_32_seed_555.pth"
+    else:
+        model_path = args.model_path
     
-    get_inferences(args.model_path, args.image_dir, args.architecture, args.loss, args.results_folder, args.make_hair_mask)
+    get_inferences(model_path, args.image_dir, args.architecture, args.loss, args.results_folder, args.make_hair_mask)
     print(f"Inferences saved to {args.results_folder}")
 
 def metrics(args):

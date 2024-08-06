@@ -262,7 +262,7 @@ if __name__ == "__main__":
 
     balance = True
 
-    dataset = CocoDataset(img_dir="training_images", ann_file="labelbox_coco.json", transform=transform)
+    dataset = CocoDataset(img_dir="training_images", ann_file="annotations/labelbox_coco.json", transform=transform)
     #dataset = CocoDataset(img_dir="training_labelbox/training_images", ann_file="training_labelbox/labelbox_coco.json", transform=transform)
 
 

@@ -168,7 +168,7 @@ def run_metrics(trained_model, dataset, arch, batch, loss, subset_size = 200, gp
 
 def main():
     trained_model = 'models/labelbox_data_DeepLabV3_dice_balanced_bs_64_seed_201_epoch_25.pth'
-    dataset = CocoDataset(img_dir="training_images", ann_file="labelbox_coco.json", transform=transform)
+    dataset = CocoDataset(img_dir="training_images", ann_file="annotations/labelbox_coco.json", transform=transform)
     
     avg_iou, avg_iou_weighted, avg_test_dice, precision, recall, f1, total_conf_matrix = run_metrics(trained_model, dataset, arch = "DeepLabV3", batch = 32, loss="dice", subset_size = 500, gpu_index=2)
     

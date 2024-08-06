@@ -15,7 +15,7 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 import cv2
-from post_proccessing import analyze_landing_areas
+from postproccessing.post_proccessing import analyze_landing_areas
 import time
 import logging
 
@@ -275,5 +275,5 @@ if __name__ == "__main__":
 
     model = load_model(arch, model_path, n_classes).to(device)
 
-    main(image_dir, tile_dir, model, n_classes, results, transform, device, isMain=True)
+    main(image_dir, tile_dir, model, n_classes, results, transform, device)
 #TO RUN: nohup python -u make_inferences.py > inferences.log &
