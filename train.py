@@ -15,6 +15,9 @@ from losses.dice_loss import DiceLoss, WeightedDiceLoss
 from losses.diceBCE_loss import DiceBCELoss
 from enum import Enum
 import random
+import os
+from datetime import datetime
+
 
 # Dictionary mapping string keys to loss types
 LossTypes = {
@@ -53,7 +56,7 @@ def calculate_class_weights(dataset):
     return torch.tensor([weight_background, weight_foreground])
 
 
-def train_model(model, loss, train_loader, val_loader, test_dataloader, name, class_weights=None, lr=0.001, gpu_num=2, num_epochs=30, patience=20, tolerance=1e-4):
+def train_model(model, loss, train_loader, val_loader, test_dataloader, name, class_weights=None, lr=0.001, gpu_num=2, num_epochs=30, patience=20, tolerance=1e-4, ablation_run=False):
     device = torch.device(f"cuda:{gpu_num}" if torch.cuda.is_available() else "cpu")
     
     model.to(device)
@@ -99,7 +102,9 @@ def train_model(model, loss, train_loader, val_loader, test_dataloader, name, cl
         epoch_time = time.time() - start_time
         train_loss = running_loss / len(train_loader)
         train_losses.append(train_loss)
-        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Time: {epoch_time:.2f} seconds")
+        
+        if not ablation_run:
+            print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Time: {epoch_time:.2f} seconds")
 
         model.eval()
         val_running_loss = 0.0
@@ -195,7 +200,16 @@ def prepare_data(dataset, batch_size=32):
 
     return train_dataloader, val_dataloader, test_dataloader
 
-def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=32, seed=201, num_epochs = 30, gpu_index = 1):
+def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=32, seed=201, num_epochs = 30, gpu_index = 1, ablation_run = False):
+
+    # Get the current date
+    now = datetime.now()
+
+    # Format the date as month-day-year
+    formatted_date = now.strftime("%m-%d-%Y")
+
+    if not os.path.exists("models"):
+            os.makedirs("models")
 
     set_random_seed(seed=seed)
 
@@ -225,10 +239,10 @@ def run_train(dataset, loss = "xe", arch = "unet", balance = False, batch_size=3
     else:
         print("Invalid model")
 
-    name = f"labelbox_data_{arch}_{loss}_{'balanced' if balance else 'unbalanced'}_bs_{batch_size}_seed_{seed}"
+    name = f"{arch}_{loss}_{'balanced' if balance else 'unbalanced'}_bs_{batch_size}_seed_{seed}_{formatted_date}"
     saved_name = f"models/{name}.pth"
 
-    trained_model, train_losses, val_losses, avg_test_loss = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, name=name, class_weights=class_weights, num_epochs = num_epochs, gpu_num = gpu_index)
+    trained_model, train_losses, val_losses, avg_test_loss = train_model(model, loss, train_dataloader, val_dataloader, test_dataloader, name=name, class_weights=class_weights, num_epochs = num_epochs, gpu_num = gpu_index, ablation_run = ablation_run)
 
     torch.save(trained_model.state_dict(), saved_name)
 

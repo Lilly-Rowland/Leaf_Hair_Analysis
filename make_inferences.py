@@ -19,8 +19,6 @@ from post_proccessing import analyze_landing_areas
 import time
 import logging
 
-logging.basicConfig(filename='inferences.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
-
 # Dictionary mapping string keys to loss types
 LossTypes = {
     'dice': 1,
@@ -119,17 +117,22 @@ def stitch_masks(tile_masks, leaf = "leaf"):
 #     #find sizes of different obect in image --> make array of the different sizes + do stats
 #     # mean, median, max size, min size, distribution, graph of distribution
 
-def main(image_dir, tile_dir, model, loss, results_path):
+def main(image_dir, tile_dir, model, loss, results_path, transform, device, make_hair_mask=True):
+
+    print(f"Making inferences on images from {image_dir}")
+
+    mask_dir = f"{os.path.basename(image_dir)}_hair_masks"
+    if make_hair_mask:
+        if not os.path.exists(mask_dir):
+            os.makedirs(mask_dir)
+        print(f"Leaf hair masks saved to {mask_dir}")
+
 
     results_df = pd.DataFrame()
     all_data = []
-    # if not os.path.isfile(results):
-    #     results_df = pd.DataFrame(columns=columns)
-    # else:
-    #     results_df = pd.read_excel(results)
 
     create_or_clear_directory(tile_dir)
-    print("Leaves to be inference:\n", os.listdir(image_dir))
+    print("Leaves to be inferenced:\n", os.listdir(image_dir))
     for leaf in os.listdir(image_dir):
         print("Current leaf: ", leaf)
         start_time = time.time()
@@ -172,15 +175,16 @@ def main(image_dir, tile_dir, model, loss, results_path):
    
         reconstructed_mask = reconstructed_mask & background_mask
 
-        landing_area_mask = cv2.bitwise_not((reconstructed_mask * 255).astype(np.uint8) | cv2.bitwise_not(background_mask))
+        landing_area_mask = cv2.bitwise_not(reconstructed_mask | cv2.bitwise_not(background_mask))
         
         mask_stats = analyze_landing_areas(landing_area_mask, total_hair_pixels, total_leaf_pixels)
-        print(mask_stats)
-        # Save leaf mask
 
-        reconstructed_mask_image = Image.fromarray(reconstructed_mask)
-        reconstructed_mask_image.save(f'labelbox_whole_leaf_mask/reconstructed_mask_{leaf}')
-        
+
+        if make_hair_mask:
+            # Save leaf mask
+            reconstructed_mask_image = Image.fromarray(reconstructed_mask)
+            reconstructed_mask_image.save(f"{mask_dir}/reconstructed_{leaf}")
+            
         end_time = time.time()
         elapsed_time = end_time - start_time
 
@@ -193,8 +197,6 @@ def main(image_dir, tile_dir, model, loss, results_path):
 
     results_df = pd.DataFrame(all_data)
 
-    print(results_df)
-
     if os.path.isfile(results_path):
         os.remove(results_path)
     
@@ -202,7 +204,26 @@ def main(image_dir, tile_dir, model, loss, results_path):
 
     results_df.to_excel(results_path, index=False)
 
-            
+def get_inferences(model_path, image_dir, arch, loss, results_folder, make_hair_mask):
+    
+    logging.basicConfig(filename='inferences.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
+
+    tile_dir = "/tmp/temp_tiles"
+    n_classes = LossTypes[loss]
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Define the same transforms used during training
+    transform = T.Compose([
+        T.Resize((224, 224)),
+        T.ToTensor(),
+        T.Normalize(mean=[0.35860088, 0.4009117,  0.32194334],
+                    std=[0.18724611, 0.19575961, 0.23898095])
+    ])
+
+    model = load_model(arch, model_path, n_classes).to(device)
+
+    main(image_dir, tile_dir, model, n_classes, results_folder, transform, device, make_hair_mask)
+
 
 if __name__ == "__main__":
     # model_path = 'models/deeplabv3_dice_balanced_bs_32_seed_555_epoch_26.pth'
@@ -229,8 +250,11 @@ if __name__ == "__main__":
     # model = load_model(arch, model_path, n_classes).to(device)
 
     # main(image_dir, tile_dir, model, n_classes, results)
+
+    logging.basicConfig(filename='inferences.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
+
     model_path = 'models/labelbox_data_DeepLabV3_dice_balanced_bs_64_seed_201_epoch_25.pth'
-    image_dir = "leaves_to_inference"
+    image_dir = "repository06032024_DM_6-8-2024_3dpi_1"
     tile_dir = "/tmp/temp_tiles"
 
     arch = "deeplabv3"
@@ -251,6 +275,5 @@ if __name__ == "__main__":
 
     model = load_model(arch, model_path, n_classes).to(device)
 
-    main(image_dir, tile_dir, model, n_classes, results)
-
+    main(image_dir, tile_dir, model, n_classes, results, transform, device, isMain=True)
 #TO RUN: nohup python -u make_inferences.py > inferences.log &

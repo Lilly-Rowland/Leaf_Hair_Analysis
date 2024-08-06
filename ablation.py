@@ -2,7 +2,7 @@ import os
 import torch
 import multiprocessing as mp
 from coco_dataset import CocoDataset, transform
-from train import run_train  # Assuming your training function is in train.py
+from train import run_train
 from calculate_metrics import run_metrics
 import pandas as pd
 from confusion_matrix_evaluation import plot_confusion_matrix
@@ -29,9 +29,6 @@ LOSS_FUNCTIONS = {
 BALANCE_OPTIONS = [False, True]  # Whether to balance class weights or not
 BATCH_SIZE = [8,16,32]  # Batch sizes to experiment with
 
-# Setup logging configuration
-logging.basicConfig(filename='ablation.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 def run_experiment(dataset, experiment, gpu_index):
     arch, loss, balance, batch = experiment
@@ -41,7 +38,7 @@ def run_experiment(dataset, experiment, gpu_index):
     logging.info(f"Running experiment: Architecture={arch}, Loss={loss}, Balance={balance}, Batch Size={batch}")
 
     try:
-        trained_model, avg_test_loss, name = run_train(dataset, loss=loss, arch=arch, balance=balance, seed=SEED, batch_size=batch, num_epochs=NUM_EPOCHS, gpu_index=gpu_index)
+        trained_model, avg_test_loss, name = run_train(dataset, loss=loss, arch=arch, balance=balance, seed=SEED, batch_size=batch, num_epochs=NUM_EPOCHS, gpu_index=gpu_index, ablation_run=True)
         end_time = time.time()
         elapsed_time = end_time - start_time
         
@@ -68,7 +65,15 @@ def run_experiment(dataset, experiment, gpu_index):
         logging.error(f"Experiment failed for: Architecture={arch}, Loss={loss}, Balance={balance}, Batch Size={batch}. Error: {str(e)}")
         return None
 
-def run_ablation(dataset):
+def run_ablation(img_dir, ann_file, excel_file = 'results/ablation_results.xlsx', isMain = False):
+    
+    # Setup logging configuration
+    logging.basicConfig(filename='ablation.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    
+    if not isMain:
+        logger = logging.getLogger('ablation')
+        logger.setLevel(logging.INFO)
+    dataset = CocoDataset(img_dir, ann_file, transform=transform)
     results = mp.Manager().list()
     experiments = [(arch_name, loss_name, balance_option, batch_size)
                    for arch_name in ARCHITECTURES.keys()
@@ -100,14 +105,15 @@ def run_ablation(dataset):
         process.join()
 
     df = pd.DataFrame(list(results))
-    excel_file = 'results/ablation_results.xlsx'
     df.to_excel(excel_file, index=False)
     logging.info(f"Excel file '{excel_file}' created successfully.")
 
 if __name__ == "__main__":
-    dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
+
+    img_dir="Data"
+    ann_file="Data/combined_coco.json"
     print("Script running in the background. Check 'ablation.log' for logs.")
-    run_ablation(dataset=dataset)
+    run_ablation(img_dir, ann_file, isMain = True)
 
 
 #TO RUN: nohup python -u ablation.py > ablation.log &
