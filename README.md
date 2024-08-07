@@ -31,9 +31,9 @@ This task trains a model from the leaf data based on specified parameters
 | `--batch-size`     | Batch size for training                           | `32`                                        |
 | `--epochs`         | Number of epochs for training                     | `100`                                       |
 | `--learning-rate`  | Learning rate for training                        | `0.001`                                     |
-| `--loss`           | Loss function to use for training                 | `dice`                                      |
-| `--architecture`   | Model architecture                                | `DeepLabV3`                                 |
-| `--balance`        | Whether to balance the class weights              | `True`                                      |
+| `--loss`           | Loss function to use for training ("xe", "dice", "dicebce")                | `dice`                                      |
+| `--architecture`   | Model architecture (DeepLabV3, nested_unet, unet, segnet)                                | `DeepLabV3`                                 |
+| `--balance`        | Whether to balance the class weights (True or False)             | `True`                                      |
 | `--gpu-index`      | Index of the GPU to use for training              | `1`                                         |
 
 
@@ -46,8 +46,8 @@ This task makes inferences (calcuates leaf hair analyses) using the model.
 |:--------------------|:------------------------------------------------------|:----------------------------------------------|
 | `--image-dir`       | Directory containing images for inference           | *Required*                                    |
 | `--model-path`      | Path to the trained model                           | `models/model-2.pth`                        |
-| `--loss`            | Loss function used for training                     | `dice`                                      |
-| `--architecture`    | Model architecture                                  | `DeepLabV3`                                 |
+| `--loss`            | Loss function used for training ("xe", "dice", "dicebce")                    | `dice`                                      |
+| `--architecture`    | Model architecture (DeepLabV3, nested_unet, unet, segnet)                                 | `DeepLabV3`                                 |
 | `--results-folder`  | File to save the inference results                  | `results/hair_model_results.xlsx`            |
 | `--use-model-1`     | Whether to use model from dataset 1 or 2            | `False`                                     |
 | `--make-hair-mask`  | Whether to save reconstructed hair masks            | `False`                                     |
@@ -64,9 +64,9 @@ This task calculates metrics to determine the quality of the model. The paramete
 | `--annotations`     | COCO annotations file                             | `annotations/labelbox_coco.json`            |
 | `--batch-size`      | Batch size for training                           | `32`                                        |
 | `--epochs`          | Number of epochs for training                     | `100`                                       |
-| `--loss`            | Loss function used for training                   | `dice`                                      |
-| `--architecture`    | Model architecture                                | `DeepLabV3`                                 |
-| `--balance`         | Whether to balance the class weights              | `True`                                      |
+| `--loss`            | Loss function used for training ("xe", "dice", "dicebce")                  | `dice`                                      |
+| `--architecture`    | Model architecture(DeepLabV3, nested_unet, unet, segnet)                               | `DeepLabV3`                                 |
+| `--balance`         | Whether to balance the class weights (True or False)             | `True`                                      |
 | `--gpu-index`       | Index of the GPU to use                           | `1`                                         |
 | `--subset-size`     | Size of the subset for metrics calculation        | `200`                                       |
 
@@ -84,9 +84,9 @@ runs inferences using that generated model.
 | `--batch-size`      | Batch size for training                           | `32`                                        |
 | `--epochs`          | Number of epochs for training                     | `10`                                        |
 | `--learning-rate`   | Learning rate for training                        | `0.001`                                     |
-| `--loss`            | Loss function to use for training                 | `dice`                                      |
-| `--architecture`    | Model architecture                                | `DeepLabV3`                                 |
-| `--balance`         | Whether to balance the class weights              | `True`                                      |
+| `--loss`            | Loss function to use for training ("xe", "dice", "dicebce")                 | `dice`                                      |
+| `--architecture`    | Model architecture (DeepLabV3, nested_unet, unet, segnet)                               | `DeepLabV3`                                 |
+| `--balance`         | Whether to balance the class weights (True or False)              | `True`                                      |
 | `--gpu-index`       | Index of the GPU to use for training              | `1`                                         |
 | `--results-folder`  | File to save the inference results                | `results/hair_model_results.xlsx`            |
 | `--make-hair-mask`  | Whether to save reconstructed hair masks          | `False`                                     |

@@ -10,13 +10,14 @@ MEM="16G"
 TASK="train_and_infer"
 
 # Check comments for what sub-arguments are required (*) and optional for the requested task
-MODEL_PATH="models/model-2.pth" #"path/to/model.pth" # infer, metrics*, train_and_infer
+
+MODEL_PATH="models/model-2.pth" # "path/to/model.pth" # infer, metrics*, train_and_infer
 LEAF_IMAGES="training_images" # train, metrics, train_and_infer, ablation
 ANNOTATIONS="annotations/labelbox_coco.json" # train, metrics, train_and_infer, ablation
 BATCH_SIZE=32 # train, metrics, train_and_infer
 EPOCHS=100 # train, metrics, train_and_infer
 ARCHITECTURE="DeepLabV3" # train, train_and_infer
-LOSS="dicebce" # train, metrics, train_and_infer
+LOSS="dice" # train, metrics, train_and_infer
 BALANCE=True # train, metrics, train_and_infer
 GPU_INDEX=1 # train, metrics, train_and_infer
 SUBSET_SIZE=200 # metrics
@@ -33,19 +34,5 @@ docker1 run --gpus $GPUS --rm\
 	--shm-size=$MEM \
 	docker.io/biohpc_$(whoami)/$IMAGE_NAME \
 	python3 app.py $TASK \
-    --loss $LOSS \
-	--image-dir $LEAVES_TO_INFERENCE \
-	# --model-path $MODEL_PATH \
-	# --make-hair-mask $MAKE_HAIR_MASK
-    # --leaf-images $LEAF_IMAGES \
-    # --epochs 1
-    # --annotations $ANNOTATIONS \
-    # --batch-size $BATCH_SIZE \
-    # --epochs $EPOCHS \
-    # --architecture $ARCHITECTURE \
-    # --loss $LOSS \
-    # --balance $BALANCE \
-    # --gpu-index $GPU_INDEX \
-    # --subset-size $SUBSET_SIZE
-	
+    # add the sub-arguments here. Check README or use --help tag for more details
 	
