@@ -172,8 +172,9 @@ def main():
     
     avg_iou, avg_iou_weighted, avg_test_dice, precision, recall, f1, total_conf_matrix = run_metrics(trained_model, dataset, arch = "DeepLabV3", batch = 32, loss="dice", subset_size = 500, gpu_index=2)
     
-    plot_confusion_matrix(total_conf_matrix, classes=['Background', 'Leaf Hair'])
-    
+    # Plot cm and save to png to see output
+    cm = plot_confusion_matrix(total_conf_matrix, classes=['Background', 'Leaf Hair'])
+
     output = {'Average IOU': float(avg_iou),
             'Average Dice Coefficient': avg_test_dice,
             'Precision': precision,
@@ -181,37 +182,6 @@ def main():
             'F1': f1}
     print(output)
     
-    # isXE = False
-    # if 'xe' in name:
-    #     isXE = True
-    # n_classes = 1  # Number of classes in your segmentation task
-    # if isXE:
-    #     n_classes = 2
-    # model = DeepLabV3(3, n_classes)
-
-    # # Load the saved model weights
-    # model.load_state_dict(torch.load(name))
-    # model.eval()
-
-    # # Load the full dataset
-    # full_dataset = CocoDataset(img_dir="Data", ann_file="Data/combined_coco.json", transform=transform)
-
-    # # Select a subset of the dataset for testing
-    # subset_size = 1000  # Define the size of the subset
-    # subset_indices = random.sample(range(len(full_dataset)), subset_size)
-    # test_dataset = Subset(full_dataset, subset_indices)
-
-    # # Create the test data loader
-    # test_dataloader = DataLoader(test_dataset, batch_size=8, num_workers=4)
-
-    # # Evaluate the model on the test set
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # model.to(device)
-    # avg_test_iou, avg_iou_tp, avg_test_dice, total_conf_matrix = evaluate_model(model, test_dataloader, device, n_classes, test_dataset)
-
-    # print(f"Final Test mIOU: {avg_test_iou:.4f}")
-    # print(f"Final Test TP mIOU: {avg_iou_tp:.4f}")
-    # print(f"Final Test Dice Coefficient: {avg_test_dice:.4f}")
 
 if __name__ == "__main__":
     main()
