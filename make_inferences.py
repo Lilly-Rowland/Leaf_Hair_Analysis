@@ -195,6 +195,9 @@ def main(image_dir, tile_dir, model, loss, results_path, transform, device, make
         
         all_data.append(results)
 
+    print(all_data)
+    logging.info(all_data)
+
     results_df = pd.DataFrame(all_data)
 
     if os.path.isfile(results_path):

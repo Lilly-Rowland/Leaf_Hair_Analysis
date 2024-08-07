@@ -1,11 +1,10 @@
 #!/bin/bash
 
 LOCAL_DIR=/local/workdir/$(whoami)
-PROJECT_DIR={{cookiecutter.project_name}}
-API_KEY={{cookiecutter.wandb_key}}
-IMAGE_NAME={{cookiecutter.image_name}}
-GPUS={{cookiecutter.gpus}}
-MEM={{cookiecutter.mem}}
+PROJECT_DIR=leaf_hair_analysis
+IMAGE_NAME=leaf_hair_analysis_image
+GPUS=8
+MEM="16G"
 
 docker1 run --gpus $GPUS -it\
 	--shm-size=$MEM \
