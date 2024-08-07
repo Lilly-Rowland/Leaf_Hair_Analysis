@@ -15,9 +15,7 @@ There are four different task commands:
 3. `train_and_infer`
 4. `ablation`
 
-Change TASK to equal desired task. Each task has different parameters. Either
-run with `python3 app.py $TASK --help` to see required and optional arguments
-or see below:
+Change TASK to equal desired task. Each task has different parameters. Either run with `python3 app.py $TASK --help` to see required and optional arguments or see below:
 
 # train
 This task trains a model from the leaf data based on specified parameters
@@ -71,8 +69,7 @@ This task calculates metrics to determine the quality of the model. The paramete
 | `--subset-size`     | Size of the subset for metrics calculation        | `200`                                       |
 
 # train_and_infer
-This task makes trains a model from the leaf data based on specified parameters and then
-runs inferences using that generated model.
+This task makes trains a model from the leaf data based on specified parameters and then runs inferences using that generated model.
 
 **Parameters**
 
@@ -92,10 +89,7 @@ runs inferences using that generated model.
 | `--make-hair-mask`  | Whether to save reconstructed hair masks          | `False`                                     |
 
 # ablation
-This task runs an ablation to find the best model suited to the data. It looks at four
-different architectures (DeepLabV3, UNet, UNet++, SegNet), three loss functions (Dice, DiceBCE, Cross Entropy),
-three batch sizes (8, 16, 32), and balance (weighting classes inversely porportional to their frequencies).
-The earlier ablation results can be found in `results/ablation_results.xlsx`.
+This task runs an ablation to find the best model suited to the data. It looks at four different architectures (DeepLabV3, UNet, UNet++, SegNet), three loss functions (Dice, DiceBCE, Cross Entropy), three batch sizes (8, 16, 32), and balance (weighting classes inversely porportional to their frequencies). The earlier ablation results can be found in `results/ablation_results.xlsx`.
 Best Model: DeepLabV3, Dice, 32 batch size, balanced
 
 **Parameters**
