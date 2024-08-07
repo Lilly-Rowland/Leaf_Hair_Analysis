@@ -9,7 +9,7 @@ from coco_dataset import CocoDataset, transform
 import random
 from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
 from train import calculate_class_weights
-from confusion_matrix_evaluation import plot_confusion_matrix
+from postproccessing.confusion_matrix_evaluation import plot_confusion_matrix
 
 # Set random seed for reproducibility
 random_seed = 42
@@ -175,7 +175,6 @@ def main():
     plot_confusion_matrix(total_conf_matrix, classes=['Background', 'Leaf Hair'])
     
     output = {'Average IOU': float(avg_iou),
-            'Average Weighted IOU': float(avg_iou_weighted),
             'Average Dice Coefficient': avg_test_dice,
             'Precision': precision,
             'Recall': recall,

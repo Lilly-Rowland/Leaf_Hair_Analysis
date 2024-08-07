@@ -1,7 +1,7 @@
 import torch
 import os
 import shutil
-from sample_manipulation.create_image_tiles_by_leaf_id import split_image_into_tiles
+from preprocessing.sample_manipulation.create_image_tiles_by_leaf_id import split_image_into_tiles
 import torchvision.transforms as T
 from PIL import Image
 from unet import UNet  # Import your UNet model class
@@ -10,7 +10,7 @@ from archs.deeplabv3 import DeepLabV3
 from archs.segnet import SegNet
 import numpy as np
 import pandas as pd
-from crop_leaf import get_background_mask
+from postproccessing.crop_leaf import get_background_mask
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -132,9 +132,9 @@ def main(image_dir, tile_dir, model, loss, results_path, transform, device, make
     all_data = []
 
     create_or_clear_directory(tile_dir)
-    print("Leaves to be inferenced:\n", os.listdir(image_dir))
+    logging.info(f"Leaves to be inferenced:\n{os.listdir(image_dir)}")
     for leaf in os.listdir(image_dir):
-        print("Current leaf: ", leaf)
+        logging.info(f"Current leaf: {leaf}")
         start_time = time.time()
         image_path = os.path.join(image_dir, leaf)
         background_mask = get_background_mask(image_path)
@@ -195,7 +195,7 @@ def main(image_dir, tile_dir, model, loss, results_path, transform, device, make
         
         all_data.append(results)
 
-    print(all_data)
+    (all_data)
     logging.info(all_data)
 
     results_df = pd.DataFrame(all_data)

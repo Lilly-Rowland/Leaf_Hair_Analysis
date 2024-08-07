@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
-from crop_leaf import get_background_mask
+from postproccessing.crop_leaf import get_background_mask
 
 def count_and_draw_fitting_circles(binary_image, circle_diameter):
     # Find contours in the binary image

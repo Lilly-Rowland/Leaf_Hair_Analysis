@@ -1,5 +1,5 @@
 import cv2
-from crop_leaf import get_background_mask
+from postproccessing.crop_leaf import get_background_mask
 import numpy as np
 
 def process_image(input_image_path, output_image_path):

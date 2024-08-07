@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
-from crop_leaf import get_background_mask
+from postproccessing.crop_leaf import get_background_mask
 
 def remove_outliers(hole_sizes):
     # Calculate Q1 (25th percentile) and Q3 (75th percentile)
