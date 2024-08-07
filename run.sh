@@ -12,3 +12,5 @@ docker1 run --gpus $GPUS --rm\
 	-e RESULTS_DIR=/workdir/deployments/$PROJECT_DIR/results \
 	docker.io/biohpc_$(whoami)/$IMAGE_NAME \
 	python3 /workdir/deployments/$PROJECT_DIR/src/app.py
+
+	
