@@ -1,0 +1,9 @@
+# Leaf Hair Analysis
+
+### Before you begin, you should have...
+* Docker installed (If not, visit [here](https://docs.docker.com/engine/install/))
+* Access to BioHPC
+
+## 1. Build docker container: `./build.sh`
+* Feel free to delete --no-cache so it will build faster next time
+## 2. Edit `run.sh` for appropriate parameters
