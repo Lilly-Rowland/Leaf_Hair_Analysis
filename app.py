@@ -171,8 +171,8 @@ def main():
 
     # Infer command
     infer_parser = subparsers.add_parser("infer", help="Run inference")
-    infer_parser.add_argument("--model-path", type=str, default='models/model-2.pth', help="Path to the trained model")
     infer_parser.add_argument("--image-dir", type=str, required=True, help="Directory containing images for inference")
+    infer_parser.add_argument("--model-path", type=str, default='models/model-2.pth', help="Path to the trained model")
     infer_parser.add_argument("--loss", type=str, default="dice", help="Loss function used for training")
     infer_parser.add_argument("--architecture", type=str, default="DeepLabV3", help="Model architecture")
     infer_parser.add_argument("--results-folder", type=str, default="results/hair_model_results.xlsx", help="File to save the inference results")
@@ -196,6 +196,7 @@ def main():
 
     # Train and infer command
     train_and_infer_parser = subparsers.add_parser("train_and_infer", help="Train the model and then run inference")
+    train_and_infer_parser.add_argument("--image-dir", type=str, required=True, help="Directory containing images for inference")
     train_and_infer_parser.add_argument("--leaf-images", type=str, default="training_images", help="Folder containing leaf images")
     train_and_infer_parser.add_argument("--annotations", type=str, default="annotations/labelbox_coco.json", help="COCO annotations file")
     train_and_infer_parser.add_argument("--batch-size", type=int, default=32, help="Batch size for training")
@@ -205,15 +206,14 @@ def main():
     train_and_infer_parser.add_argument("--architecture", type=str, default="DeepLabV3", help="Model architecture")
     train_and_infer_parser.add_argument("--balance", type=bool, default=True, help="Whether to balance the class weights")
     train_and_infer_parser.add_argument("--gpu-index", type=int, default=1, help="Index of the GPU to use for training")
-    train_and_infer_parser.add_argument("--image-dir", type=str, required=True, help="Directory containing images for inference")
     train_and_infer_parser.add_argument("--results-folder", type=str, default="results/hair_model_results.xlsx", help="File to save the inference results")
-    train_and_infer_parser.add_argument("--save-hair-masks", type=bool, default=False, help="Whether to save reconstructed hair masks")
+    train_and_infer_parser.add_argument("--make-hair-mask", type=bool, default=False, help="Whether to save reconstructed hair masks")
     train_and_infer_parser.set_defaults(func=train_and_infer)
 
     # Ablation command
     ablation_parser = subparsers.add_parser("ablation", help="Run ablation")
     ablation_parser.add_argument("--leaf-images", type=str, default="training_images", help="Folder containing leaf images")
-    ablation_parser.add_argument("--annotations", type=str, default="annotationslabelbox_coco.json", help="COCO annotations file")
+    ablation_parser.add_argument("--annotations", type=str, default="annotations/labelbox_coco.json", help="COCO annotations file")
     ablation_parser.add_argument("--excel-file", type=str, default="results/ablation_results.xlsx", help="File to save ablation results")
     ablation_parser.set_defaults(func=ablation)
 

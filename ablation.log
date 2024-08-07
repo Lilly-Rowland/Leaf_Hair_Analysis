@@ -1,0 +1,9 @@
+2024-08-07 16:59:53,841 - INFO - Available GPUs: 8
+2024-08-07 16:59:53,853 - INFO - Running experiment: Architecture=unet, Loss=xe, Balance=False, Batch Size=8
+2024-08-07 16:59:53,861 - INFO - Running experiment: Architecture=unet, Loss=xe, Balance=False, Batch Size=16
+2024-08-07 16:59:53,867 - INFO - Running experiment: Architecture=unet, Loss=xe, Balance=False, Batch Size=32
+2024-08-07 16:59:53,874 - INFO - Running experiment: Architecture=unet, Loss=xe, Balance=True, Batch Size=8
+2024-08-07 16:59:53,879 - INFO - Running experiment: Architecture=unet, Loss=xe, Balance=True, Batch Size=16
+2024-08-07 16:59:53,883 - INFO - Running experiment: Architecture=unet, Loss=xe, Balance=True, Batch Size=32
+2024-08-07 16:59:53,886 - INFO - Running experiment: Architecture=unet, Loss=dice, Balance=False, Batch Size=8
+2024-08-07 16:59:53,889 - INFO - Running experiment: Architecture=unet, Loss=dice, Balance=False, Batch Size=16

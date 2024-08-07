@@ -7,7 +7,6 @@ from calculate_metrics import run_metrics
 import pandas as pd
 from postproccessing.confusion_matrix_evaluation import plot_confusion_matrix
 import time
-import openpyxl
 import logging
 
 NUM_EPOCHS = 100
