@@ -33,5 +33,3 @@ RUN chown -R $HOST_USER:$HOST_USER /workdir
 USER $HOST_USER
 
 WORKDIR /workdir/Leaf_Hair_Analysis
-
-#ENTRYPOINT ["python3", "./app.py"]
