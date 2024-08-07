@@ -158,7 +158,7 @@ def main():
 
     # Train command
     train_parser = subparsers.add_parser("train", help="Train the model")
-    train_parser.add_argument("--leaf-images", type=str, default="training_images", help="Folder containing leaf images")
+    train_parser.add_argument("--leaf-images", type=str, default="training_images/dataset_2_training_images", help="Folder containing leaf images")
     train_parser.add_argument("--annotations", type=str, default="annotations/labelbox_coco.json", help="COCO annotations file")
     train_parser.add_argument("--batch-size", type=int, default=32, help="Batch size for training")
     train_parser.add_argument("--epochs", type=int, default=100, help="Number of epochs for training")
@@ -183,7 +183,7 @@ def main():
     # Metrics command
     metrics_parser = subparsers.add_parser("metrics", help="Calculate metrics")
     metrics_parser.add_argument("--model-path", type=str, required=True, help="Path to the trained model")
-    metrics_parser.add_argument("--leaf-images", type=str, default="training_images", help="Folder containing leaf images")
+    metrics_parser.add_argument("--leaf-images", type=str, default="training_images/dataset_2_training_images", help="Folder containing leaf images")
     metrics_parser.add_argument("--annotations", type=str, default="annotations/labelbox_coco.json", help="COCO annotations file")
     metrics_parser.add_argument("--batch-size", type=int, default=32, help="Batch size for training")
     metrics_parser.add_argument("--epochs", type=int, default=100, help="Number of epochs for training")
@@ -197,7 +197,7 @@ def main():
     # Train and infer command
     train_and_infer_parser = subparsers.add_parser("train_and_infer", help="Train the model and then run inference")
     train_and_infer_parser.add_argument("--image-dir", type=str, required=True, help="Directory containing images for inference")
-    train_and_infer_parser.add_argument("--leaf-images", type=str, default="training_images", help="Folder containing leaf images")
+    train_and_infer_parser.add_argument("--leaf-images", type=str, default="training_images/dataset_2_training_images", help="Folder containing leaf images")
     train_and_infer_parser.add_argument("--annotations", type=str, default="annotations/labelbox_coco.json", help="COCO annotations file")
     train_and_infer_parser.add_argument("--batch-size", type=int, default=32, help="Batch size for training")
     train_and_infer_parser.add_argument("--epochs", type=int, default=10, help="Number of epochs for training")
@@ -212,7 +212,7 @@ def main():
 
     # Ablation command
     ablation_parser = subparsers.add_parser("ablation", help="Run ablation")
-    ablation_parser.add_argument("--leaf-images", type=str, default="training_images", help="Folder containing leaf images")
+    ablation_parser.add_argument("--leaf-images", type=str, default="training_images/dataset_2_training_images", help="Folder containing leaf images")
     ablation_parser.add_argument("--annotations", type=str, default="annotations/labelbox_coco.json", help="COCO annotations file")
     ablation_parser.add_argument("--excel-file", type=str, default="results/ablation_results.xlsx", help="File to save ablation results")
     ablation_parser.set_defaults(func=ablation)

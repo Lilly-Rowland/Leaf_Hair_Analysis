@@ -178,8 +178,8 @@ def main():
     output = {'Average IOU': float(avg_iou),
             'Average Dice Coefficient': avg_test_dice,
             'Precision': precision,
-            'Recall': recall,
-            'F1': f1}
+            'Recall': recall
+            }
     print(output)
     
 

@@ -72,10 +72,3 @@ if __name__ == "__main__":
     
     # Save the result
     cv2.imwrite('fitted_circles.png', output_image)
-
-"""
-- Take leaf mask
-- invert leaf mask
-- create filtered masks
-
-"""
