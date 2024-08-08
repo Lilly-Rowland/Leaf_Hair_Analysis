@@ -22,19 +22,29 @@ BALANCE=True # train, metrics, train_and_infer
 GPU_INDEX=1 # train, metrics, train_and_infer
 SUBSET_SIZE=200 # metrics
 LEARNING_RATE=.001 # train, train_and_infer
-LEAVES_TO_INFERENCE="leaves_to_inference" # infer, train_and_infer
+LEAVES_TO_INFERENCE="repository06032024_DM_6-8-2024_3dpi_1" # infer, train_and_infer
 RESULTS_FOLDER="results_temp" # infer, train_and_infer
-MAKE_HAIR_MASK=True # infer, train_and_infer
+MAKE_HAIR_MASK=False # infer, train_and_infer
 USE_MODEL_1=False # infer
 ABLATION_RESULTS_FILE="path/to/ablation/results/output/path" # ablation
-
-
 
 docker1 run --gpus $GPUS --rm\
 	--shm-size=$MEM \
 	docker.io/biohpc_$(whoami)/$IMAGE_NAME \
 	python3 app.py $TASK \
-    --image-dir "repository06032024_DM_6-8-2024_3dpi_1" \
-	--model-path "models/model-2.pth"
+	--image-dir $LEAVES_TO_INFERENCE \
+	--model-path "models/model-2.pth" \
+	--results-folder "repository06032024_DM_6-8-2024_3dpi_1_inferences_4_15_30" \
+	--make-hair-mask $MAKE_HAIR_MASK
     # add the sub-arguments here. Check README or use --help tag for more details
-	
+
+
+# # Run in background:
+# docker1 run --gpus $GPUS --rm \
+#     --shm-size=$MEM \
+#     docker.io/biohpc_$(whoami)/$IMAGE_NAME \
+#     bash -c "nohup python3 -u app.py $TASK \
+#     --image_dir $LEAVES_TO_INFERENCE \
+#     --model-path 'models/model-2.pth' \
+#     --results-folder 'repository06032024_DM_6-8-2024_3dpi_1_inferences_4_15_30' \
+#     --make-hair-mask $MAKE_HAIR_MASK > inferences.log 2>&1 &"

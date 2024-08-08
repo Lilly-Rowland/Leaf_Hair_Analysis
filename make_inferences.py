@@ -192,7 +192,7 @@ def main(image_dir, tile_dir, model, loss, results_path, transform, device, make
         results.update(mask_stats)
 
         logging.info(f"Finished Inference for {leaf[:-4]} | Time: {elapsed_time}")
-        
+
         all_data.append(results)
 
     (all_data)

@@ -46,8 +46,6 @@ This task makes inferences (calcuates leaf hair analyses) using the model.
 |:--------------------|:------------------------------------------------------|:----------------------------------------------|
 | `--image-dir`       | Directory containing images for inference           | *Required*                                    |
 | `--model-path`      | Path to the trained model                           | `models/model-2.pth`                        |
-| `--loss`            | Loss function used for training ("xe", "dice", "dicebce")                    | `dice`                                      |
-| `--architecture`    | Model architecture (DeepLabV3, nested_unet, unet, segnet)                                 | `DeepLabV3`                                 |
 | `--results-folder`  | File to save the inference results                  | `results/hair_model_results.xlsx`            |
 | `--use-model-1`     | Whether to use model from dataset 1 or 2            | `False`                                     |
 | `--make-hair-mask`  | Whether to save reconstructed hair masks            | `False`                                     |
