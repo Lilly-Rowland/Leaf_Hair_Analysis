@@ -1,18 +1,14 @@
+# Python virtual environment
 leaf_venv/
-coco_annotation_files/
-sc_05042023_3dpi_1/
-testing_leaf_samples/
-Presentation/
-models/*
-Data/
-leaves_to_inference/
-whole_leaf_masks/
-cropped_leaves*/
-LAB_imgs/
-training_labelbox/
-background_masks/
-training_images/
-labelbox_whole_leaf_mask/
-leaf_venv/
+
+# Results and temporary files
+results/
+preprocessing/
+__pycache__/
+
+models/
 repository06032024_DM_6-8-2024_3dpi_1_hair_masks/
 repository06032024_DM_6-8-2024_3dpi_1/
+training_images/
+dataset_1_generated_data/
+labelbox_whole_leaf_mask/
