@@ -2,10 +2,6 @@
 leaf_venv/
 
 # Results and temporary files
-results/
-preprocessing/
-__pycache__/
-
 models/
 repository06032024_DM_6-8-2024_3dpi_1_hair_masks/
 repository06032024_DM_6-8-2024_3dpi_1/
