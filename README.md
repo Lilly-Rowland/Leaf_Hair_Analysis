@@ -13,16 +13,17 @@
 * Feel free to delete --no-cache so it will build faster next time
 
 ## 3. If you just want to make inferences using the existing models, use `run_inference_gui.sh`
-Open with either the [local URL](http://0.0.0.0:7860) or the public URL printed when you run
+Open with either the local URL or the public URL printed when you run
 This is an interactive interface that allows you the run inferences on a folder of leaves added to this repository **or** upload one image to make inferences on a single leaf disk
 
 ## 4. Edit `run.sh` for appropriate parameters
 
 There are four different task commands:
 1. `train`
-2. `metrics`
-3. `train_and_infer`
-4. `ablation`
+2. `infer`
+3. `metrics`
+4. `train_and_infer`
+5. `ablation`
 
 Change TASK to equal desired task. Each task has different parameters. Either
 run with `python3 app.py $TASK --help` to see required and optional arguments
