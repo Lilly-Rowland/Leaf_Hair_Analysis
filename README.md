@@ -9,10 +9,14 @@
 * [For using pretrained models](https://app.box.com/s/4tmc0bhcoy24k8usfro7i0j0chd0q98k)
 
 ## 2. Build docker container: `./build.sh`
+*Make sure you can execute the shell script with `chmod +x <filename>`*
 * Feel free to delete --no-cache so it will build faster next time
 
-## 3. Edit `run.sh` for appropriate parameters
-*Make sure you can execute the shell script with `chmod +x <filename>`*
+## 3. If you just want to make inferences using the existing models, use `run_inference_gui.sh`
+Open with either the [local URL](http://0.0.0.0:7860) or the public URL printed when you run
+This is an interactive interface that allows you the run inferences on a folder of leaves added to this repository **or** upload one image to make inferences on a single leaf disk
+
+## 4. Edit `run.sh` for appropriate parameters
 
 There are four different task commands:
 1. `train`
