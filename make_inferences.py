@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import cv2
 from postproccessing.post_proccessing import analyze_landing_areas
 import time
-import logging
+import logging 
 
 # Dictionary mapping string keys to loss types
 LossTypes = {
@@ -117,7 +117,7 @@ def stitch_masks(tile_masks, leaf = "leaf"):
 #     #find sizes of different obect in image --> make array of the different sizes + do stats
 #     # mean, median, max size, min size, distribution, graph of distribution
 
-def main(image_dir, tile_dir, model, loss, results_path, transform, device, make_hair_mask=True):
+def main(image_dir, tile_dir, model, loss, results_path, transform, device, make_hair_mask=False):
 
     print(f"Making inferences on images from {image_dir}")
 
@@ -207,6 +207,8 @@ def main(image_dir, tile_dir, model, loss, results_path, transform, device, make
 
     results_df.to_excel(results_path, index=False)
 
+    return results_path, mask_dir
+
 def get_inferences(model_path, image_dir, arch, loss, results_folder, make_hair_mask):
     
     logging.basicConfig(filename='inferences.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
@@ -225,7 +227,7 @@ def get_inferences(model_path, image_dir, arch, loss, results_folder, make_hair_
 
     model = load_model(arch, model_path, n_classes).to(device)
 
-    main(image_dir, tile_dir, model, n_classes, results_folder, transform, device, make_hair_mask)
+    return main(image_dir, tile_dir, model, n_classes, results_folder, transform, device, make_hair_mask)
 
 
 if __name__ == "__main__":
@@ -256,7 +258,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(filename='inferences.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
 
-    model_path = 'models/labelbox_data_DeepLabV3_dice_balanced_bs_64_seed_201_epoch_25.pth'
+    model_path = 'models/model-2.pth'
     image_dir = "repository06032024_DM_6-8-2024_3dpi_1"
     tile_dir = "/tmp/temp_tiles"
 

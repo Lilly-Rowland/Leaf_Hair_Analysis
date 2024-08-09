@@ -25,11 +25,16 @@ RUN pip install --upgrade pip
 
 COPY requirements.txt /workdir
 
-#RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+#RUN pip install -r requirements.txt
 
 RUN chown -R $HOST_USER:$HOST_USER /workdir
 
 USER $HOST_USER
 
+RUN pip install gradio
+
 WORKDIR /workdir/Leaf_Hair_Analysis
+
+EXPOSE 7860
+ENV GRADIO_SERVER_NAME="0.0.0.0"

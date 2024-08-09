@@ -4,10 +4,15 @@
 * Docker installed (If not, visit [here](https://docs.docker.com/engine/install/))
 * Access to BioHPC
 
-## 1. Build docker container: `./build.sh`
+## 1. Clone repo and add add the following files from [Box](https://app.box.com/s/wwjb3ao8scehfdtn30h5rwf4wqlbb2er):
+* [For training with dataset-1 and/or dataset-2](https://app.box.com/s/82ytvqu9wkjefatr9eazsxorfuo911kl)
+* [For using pretrained models](https://app.box.com/s/4tmc0bhcoy24k8usfro7i0j0chd0q98k)
+
+## 2. Build docker container: `./build.sh`
 * Feel free to delete --no-cache so it will build faster next time
 
-## 2. Edit `run.sh` for appropriate parameters
+## 3. Edit `run.sh` for appropriate parameters
+*Make sure you can execute the shell script with `chmod +x <filename>`*
 
 There are four different task commands:
 1. `train`
@@ -46,6 +51,8 @@ This task makes inferences (calcuates leaf hair analyses) using the model.
 |:--------------------|:------------------------------------------------------|:----------------------------------------------|
 | `--image-dir`       | Directory containing images for inference           | *Required*                                    |
 | `--model-path`      | Path to the trained model                           | `models/model-2.pth`                        |
+| `--loss`            | Loss function used for training ("xe", "dice", "dicebce")                    | `dice`                                      |
+| `--architecture`    | Model architecture (DeepLabV3, nested_unet, unet, segnet)                                 | `DeepLabV3`                                 |
 | `--results-folder`  | File to save the inference results                  | `results/hair_model_results.xlsx`            |
 | `--use-model-1`     | Whether to use model from dataset 1 or 2            | `False`                                     |
 | `--make-hair-mask`  | Whether to save reconstructed hair masks            | `False`                                     |
